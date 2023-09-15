@@ -1,4 +1,4 @@
-import { IResponse } from "@/contracts/IResponse";
+import { IResponse } from "@/contracts/usecases/IResponse";
 
 export class Response implements IResponse {
 
@@ -23,20 +23,24 @@ export class Response implements IResponse {
         return this.data
     }
 
-    setStatus(status: boolean): void {
+    setStatus(status: boolean): IResponse {
         this.status = status
+        return this
     }
 
-    setStatusCode(statusCode: number): void {
+    setStatusCode(statusCode: number): IResponse {
         this.statusCode = statusCode
+        return this
     }
 
-    setMessage(message: string): void {
+    setMessage(message: string): IResponse {
         this.message = message
+        return this
     }
 
-    setData(data: any): void {
+    setData(data: any): IResponse {
         this.data = data
-    }
+        return this 
+    }  
 
 }

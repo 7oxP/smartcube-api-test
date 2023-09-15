@@ -1,5 +1,5 @@
-import { IResponse } from "@/contracts/IResponse";
-import { IStorageService } from "@/contracts/IStorageServices";
+import { IResponse } from "@/contracts/usecases/IResponse";
+import { IStorageService } from "@/contracts/usecases/IStorageServices";
 
 class StorageService implements IStorageService {
     uploadFile(file: File): IResponse {

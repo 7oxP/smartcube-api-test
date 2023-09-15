@@ -9,9 +9,9 @@ export interface IResponse {
     getMessage(): string
     getData(): any
 
-    setStatus(status: boolean): void
-    setStatusCode(statusCode: number): void
-    setMessage(message: string): void
-    setData(data: any): void
+    setStatus(status: boolean): IResponse
+    setStatusCode(statusCode: number): IResponse
+    setMessage(message: string): IResponse
+    setData(data: any): IResponse
     
 }
