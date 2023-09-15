@@ -33,4 +33,3 @@ export class Database {
         return this.conn!
     }
 }
-

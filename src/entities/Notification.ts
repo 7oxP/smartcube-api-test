@@ -10,6 +10,14 @@ NotificationEntity.init({
         autoIncrement: true,
         primaryKey: true
     },
+    user_id: {
+        type: DataTypes.BIGINT.UNSIGNED,
+        allowNull: false,
+        references: {
+          model: 'User', // 'Actors' would also work
+          key: 'id'
+        }
+    },
     title: {
         type: DataTypes.CHAR(255),
         allowNull: false,
