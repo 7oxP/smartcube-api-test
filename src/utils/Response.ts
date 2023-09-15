@@ -2,10 +2,10 @@ import { IResponse } from "@/contracts/usecases/IResponse";
 
 export class Response implements IResponse {
 
-    status: boolean = false;
-    statusCode: number = 0;
-    message: string = '';
-    data: any;
+    private status: boolean = false;
+    private statusCode: number = 0;
+    private message: string = '';
+    private data: any;
 
     getStatus(): boolean {
        return this.status

@@ -109,6 +109,6 @@
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
 
-  "include": ["src/**/*.ts", "src/**/*.json"],
+  "include": ["src/**/*.ts", "src/**/*.json", "src/database/db.config.js"],
   "exclude": ["node_modules", "src/logs", "tests"]
 }

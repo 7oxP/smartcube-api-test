@@ -1,7 +1,8 @@
-import { INotificationRepositories } from "@/contracts/repositories/INotificationRepositories";
 import { INotificationService } from "@/contracts/usecases/INotificationService";
+import { INotificationRepositories } from "@/contracts/repositories/INotificationRepositories";
 import { IResponse } from "@/contracts/usecases/IResponse";
 import { storeNotification } from "./StoreNotification";
+import { File } from "buffer";
 
 class NotificationService implements INotificationService {
 
@@ -12,7 +13,7 @@ class NotificationService implements INotificationService {
     }
 
     storeNotification(file: File, title: string, description: string): IResponse {
-        return storeNotification(this.notifRepo)
+        return storeNotification(this.notifRepo!)
     }
 
     viewNotification(id: number): IResponse {
@@ -24,3 +25,5 @@ class NotificationService implements INotificationService {
     }
     
 }
+
+export { NotificationService }
