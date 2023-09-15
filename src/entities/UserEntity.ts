@@ -23,7 +23,7 @@ UserEntity.init({
   password: {
     type: DataTypes.TEXT,
     allowNull: false
-  }
+  },
 }, {
   sequelize: db.getConnection(),
   modelName: 'User',
@@ -32,6 +32,5 @@ UserEntity.init({
 });
 
 UserEntity.hasMany(NotificationEntity)
-NotificationEntity.belongsTo(UserEntity)
 
 export default UserEntity
