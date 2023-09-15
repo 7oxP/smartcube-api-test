@@ -28,6 +28,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "firebase": "^10.4.0",
     "mariadb": "^3.2.0",
     "mysql2": "^3.6.1",
     "sequelize": "^6.33.0"

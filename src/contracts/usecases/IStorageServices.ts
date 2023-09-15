@@ -1,4 +1,5 @@
 import { IResponse } from "./IResponse";
+import { File } from "buffer";
 
 export interface IStorageService {
     uploadFile(file: File): IResponse
