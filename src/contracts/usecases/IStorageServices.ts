@@ -2,6 +2,6 @@ import { IUploadedFile } from "../IFile";
 import { IResponse } from "./IResponse";
 
 export interface IStorageService {
-    uploadFile(file: IUploadedFile): IResponse
-    deleteFile(fileUrl: string): IResponse
+    uploadFile(file: IUploadedFile): Promise<IResponse>
+    deleteFile(fileUrl: string): Promise<IResponse>
 }

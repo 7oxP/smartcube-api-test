@@ -3,60 +3,68 @@ import { IStorageService } from "@/contracts/usecases/IStorageServices";
 import { Response } from "../../utils/Response";
 import { IUploadedFile } from "@/contracts/IFile";
 import { Storage } from "@google-cloud/storage";
+import path from "path";
+import { OperationStatus } from "../../constants/operations";
 
 export class StorageService implements IStorageService {
-  uploadFile(file: IUploadedFile): IResponse {
+  private storage: Storage;
+  private bucketName: string;
 
-    const path = require("path");
-    const keyFilename = "src/studied-union-399214-f9386348b285.json";
-    const bucketName = "smartcube-0101";
-    const filePath = "src/testFiles.txt";
-    const destFileName = path.basename(filePath);
-
-    const storage = new Storage({ keyFilename });
-
-    async function uploadingFile() {
-      const options = {
-        destination: destFileName,
-      };
-
-      await storage.bucket(bucketName).upload(filePath, options);
-
-      console.log(`${destFileName} uploaded to ${bucketName}`);
-    }
-
-    uploadingFile().catch(console.error);
-
-    return new Response()
-      .setStatus(true)
-      .setStatusCode(1)
-      .setMessage("ok")
-      .setData({ fileName: destFileName, bucketName: bucketName });
+  constructor() {
+    const keyFilename = "service_accounts/google_service_account.json";
+    this.storage = new Storage({ keyFilename });
+    this.bucketName = "smartcube-0101";
   }
 
-  deleteFile(fileUrl: string): IResponse {
-    const { Storage } = require("@google-cloud/storage");
+  async uploadFile(file: IUploadedFile): Promise<IResponse> {
+    try {
+      await this.storage
+        .bucket(this.bucketName)
+        .file(file.originalname)
+        .save(file.buffer);
 
+      console.log(`${file.originalname} uploaded to ${this.bucketName}`);
+
+      return new Response()
+        .setStatus(true)
+        .setStatusCode(OperationStatus.success)
+        .setMessage("ok")
+        .setData({
+          fileUrl: `https://storage.cloud.google.com/${this.bucketName}/${file.originalname}`,
+          fileName: file.originalname,
+          bucketName: this.bucketName,
+        });
+    } catch (error: any) {
+      return new Response()
+        .setStatus(false)
+        .setStatusCode(OperationStatus.cloudStorageError)
+        .setMessage(error)
+        .setData({});
+    }
+  }
+
+  async deleteFile(fileUrl: string): Promise<IResponse> {
     const bucketData = fileUrl.split("/");
 
-    const bucketName = bucketData[2];
-    const fileName = bucketData[3];
-    const keyFilename = "src/studied-union-399214-f9386348b285.json";
+    const fileName = bucketData[4];
 
-    const storage = new Storage({ keyFilename });
-
-    async function deleteFile() {
-      await storage.bucket(bucketName).file(fileName).delete();
-
+    try {
+      await this.storage.bucket(this.bucketName).file(fileName).delete();
       console.log(`${fileUrl} deleted`);
+
+      return new Response()
+        .setStatus(true)
+        .setStatusCode(OperationStatus.success)
+        .setMessage("ok")
+        .setData({ fileName: fileName, bucketName: this.bucketName });
+
+    } catch (error: any) {
+
+      return new Response()
+        .setStatus(false)
+        .setStatusCode(OperationStatus.cloudStorageError)
+        .setMessage(error)
+        .setData({});
     }
-
-    deleteFile().catch(console.error);
-
-    return new Response()
-      .setStatus(true)
-      .setStatusCode(1)
-      .setMessage("ok")
-      .setData({ fileName: fileName, bucketName: bucketName });
   }
 }
