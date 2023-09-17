@@ -1,9 +1,9 @@
+import { IUploadedFile } from "../IFile";
 import { IResponse } from "./IResponse";
-import { File } from "buffer";
 
 export interface IStorageService {
-    uploadFile(file: File): IResponse
+    uploadFile(file: IUploadedFile): IResponse
     fetchFile(id: number): IResponse
-    fetchAllFile(): Response
+    fetchAllFile(): IResponse
     deleteFile(fileUrl: string): IResponse
 }

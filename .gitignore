@@ -132,3 +132,5 @@ dist
 build/
 
 src/database/db.config.json
+
+service_accounts

@@ -14,7 +14,7 @@ NotificationEntity.init({
         type: DataTypes.BIGINT.UNSIGNED,
         allowNull: false,
         references: {
-          model: 'User', // 'Actors' would also work
+          model: 'users', // 'Actors' would also work
           key: 'id'
         }
     },
