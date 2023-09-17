@@ -7,6 +7,7 @@ import { IStorageService } from "@/contracts/usecases/IStorageServices";
 import { IUploadedFile } from "@/contracts/IFile";
 import { IAuthGuard } from "@/contracts/middleware/AuthGuard";
 import { viewNotification } from "./ViewNotification";
+import { deleteNotification } from "./DeleteNotification";
 
 class NotificationService implements INotificationService {
 
@@ -42,6 +43,10 @@ class NotificationService implements INotificationService {
 
     fetchAllNotification(authGuard: IAuthGuard,): Promise<IResponse> {
         throw new Error("Method not implemented.");
+    }
+
+    deleteNotification(authGuard: IAuthGuard, id: number): Promise<IResponse> {
+        return deleteNotification(authGuard, this.notifRepo, id)
     }
     
 }

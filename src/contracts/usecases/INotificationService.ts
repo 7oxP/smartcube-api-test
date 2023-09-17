@@ -6,4 +6,5 @@ export interface INotificationService {
     storeNotification(authGuard: IAuthGuard, file: IUploadedFile, title: string, description: string): Promise<IResponse>
     viewNotification(authGuard: IAuthGuard, id: number): Promise<IResponse>
     fetchAllNotification(authGuard: IAuthGuard,): Promise<IResponse>
+    deleteNotification(authGuard: IAuthGuard, id: number): Promise<IResponse>
 }

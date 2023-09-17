@@ -59,6 +59,26 @@ class NotificationRepository implements INotificationRepositories {
                 .setData({})
         }
     }
+
+    async delete(id: number): Promise<IResponse> {
+
+        try {
+            const res = await NotificationEntity.destroy({ where: { id: id } })
+
+            return new Response()
+                .setStatus(true)
+                .setStatusCode(OperationStatus.success)
+                .setMessage("ok")
+                .setData(res)
+
+        } catch (error: any) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.repoError)
+                .setMessage(error)
+                .setData({})
+        }
+    }
 }
 
 export { NotificationRepository }
