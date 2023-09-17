@@ -48,7 +48,6 @@ class NotificationService implements INotificationService {
     deleteNotification(authGuard: IAuthGuard, id: number): Promise<IResponse> {
         return deleteNotification(authGuard, this.notifRepo, id)
     }
-    
 }
 
 export { NotificationService }
