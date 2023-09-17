@@ -7,7 +7,8 @@
     "dev": "ts-node",
     "start": "tsc && node ./build/index.js",
     "build": "tsc",
-    "test": "jest --collect-coverage --detectOpenHandles"
+    "test": "jest --detectOpenHandles",
+    "test-coverage": "jest --collect-coverage --detectOpenHandles"
   },
   "author": "",
   "license": "ISC",

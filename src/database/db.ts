@@ -23,7 +23,6 @@ export class Database {
                 this.conn = new Sequelize(`mariadb://${this.user}:${this.password}@${this.host}:${this.port}/${this.dbName}`)
                 this.conn.authenticate().then();
             }
-            console.log('Connection has been established successfully.')
         } catch (error) {
             throw new Error('Unable to connect to the database: ' + error)
         } 
