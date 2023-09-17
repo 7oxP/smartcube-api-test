@@ -1,8 +1,9 @@
 import { IResponse } from "./IResponse";
-import { File } from "buffer";
+import { IUploadedFile } from "../IFile";
+import { IAuthGuard } from "../middleware/AuthGuard";
 
 export interface INotificationService {
-    storeNotification(file: File, title: string, description: string): IResponse
-    viewNotification(id: number): IResponse
-    fetchAllNotification(): IResponse
+    storeNotification(authGuard: IAuthGuard, file: IUploadedFile, title: string, description: string): Promise<IResponse>
+    viewNotification(authGuard: IAuthGuard, id: number): IResponse
+    fetchAllNotification(authGuard: IAuthGuard,): IResponse
 }

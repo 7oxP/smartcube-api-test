@@ -1,6 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import { db } from "./BaseEntity"
-import NotificationEntity from "./Notification";
+import NotificationEntity from "./NotificationEntity";
 
 class UserEntity extends Model { }
 

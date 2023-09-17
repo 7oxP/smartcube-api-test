@@ -14,4 +14,5 @@ export interface IResponse {
     setMessage(message: string): IResponse
     setData(data: any): IResponse
     
+    isFailed(): boolean
 }

@@ -17,11 +17,11 @@ export class Database {
         this.dbName = dbName
     }
 
-    async connect(): Promise<void> {
+    connect(): void {
         try {
             if (this.conn == null) {
                 this.conn = new Sequelize(`mariadb://${this.user}:${this.password}@${this.host}:${this.port}/${this.dbName}`)
-                await this.conn.authenticate();
+                this.conn.authenticate().then();
             }
             console.log('Connection has been established successfully.')
         } catch (error) {

@@ -7,7 +7,7 @@
     "dev": "ts-node",
     "start": "tsc && node ./build/index.js",
     "build": "tsc",
-    "test": "jest"
+    "test": "jest --collect-coverage --detectOpenHandles"
   },
   "author": "",
   "license": "ISC",
@@ -28,7 +28,9 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "dotenv": "^16.3.1",
     "firebase": "^10.4.0",
+    "firebase-admin": "^11.10.1",
     "mariadb": "^3.2.0",
     "mysql2": "^3.6.1",
     "sequelize": "^6.33.0"
