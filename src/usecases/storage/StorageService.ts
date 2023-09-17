@@ -13,14 +13,6 @@ export class StorageService implements IStorageService {
         .setData({fileUrl: "https://google.apis/image1.jpg"}) //dummy url
     }
 
-    fetchFile(id: number): IResponse {
-        throw new Error("Method not implemented.");
-    }
-
-    fetchAllFile(): IResponse {
-        throw new Error("Method not implemented.");
-    }
-
     deleteFile(fileUrl: string): IResponse {
         throw new Error("Method not implemented.");
     }

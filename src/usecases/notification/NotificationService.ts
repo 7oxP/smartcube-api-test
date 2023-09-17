@@ -43,6 +43,9 @@ class NotificationService implements INotificationService {
         throw new Error("Method not implemented.");
     }
     
+    deleteNotification(authGuard: IAuthGuard, id: number): IResponse {
+        throw new Error("Method not implemented.");
+    }
 }
 
 export { NotificationService }
