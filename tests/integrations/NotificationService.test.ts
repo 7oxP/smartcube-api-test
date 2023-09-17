@@ -40,6 +40,7 @@ describe("store notification", () => {
     }
 
     it("Store success", async () => {
+
         const authGuard = new AuthGuard(1, "", "", UserRoles.Admin)
 
         const res = await notificationService.storeNotification(authGuard, file, "wew1", "wew1 desc")
@@ -53,5 +54,27 @@ describe("store notification", () => {
         const res = await notificationService.storeNotification(authGuard, file, "wew1", "wew1 desc")
         assert.equal(res.getStatus(), false)
         assert.equal(res.getStatusCode(), OperationStatus.repoError)
+    })
+})
+
+
+describe("view notification", () => {
+
+    it("success", async () => {
+        const authGuard = new AuthGuard(1, "", "", UserRoles.Admin)
+
+        const res = await notificationService.viewNotification(authGuard, 2)
+        console.log(res.getMessage())
+        assert.ok(res.getStatus())
+        assert.equal(res.getStatusCode(), OperationStatus.success)
+    })
+
+    it("failed unauthorized", async () => {
+        const authGuard = new AuthGuard(0, "", "", UserRoles.Admin)
+
+        const res = await notificationService.viewNotification(authGuard, 2)
+        console.log(res.getMessage())
+        assert.equal(res.getStatus(), false)
+        assert.equal(res.getStatusCode(), OperationStatus.unauthorizedAccess)
     })
 })

@@ -6,6 +6,7 @@ import { ICloudMessagingService } from "@/contracts/usecases/ICloudMessagingServ
 import { IStorageService } from "@/contracts/usecases/IStorageServices";
 import { IUploadedFile } from "@/contracts/IFile";
 import { IAuthGuard } from "@/contracts/middleware/AuthGuard";
+import { viewNotification } from "./ViewNotification";
 
 class NotificationService implements INotificationService {
 
@@ -35,11 +36,11 @@ class NotificationService implements INotificationService {
             )
     }
 
-    viewNotification(authGuard: IAuthGuard, id: number): IResponse {
-        throw new Error("Method not implemented.");
+    viewNotification(authGuard: IAuthGuard, id: number): Promise<IResponse> {
+        return viewNotification(authGuard, this.notifRepo, id)
     }
 
-    fetchAllNotification(authGuard: IAuthGuard,): IResponse {
+    fetchAllNotification(authGuard: IAuthGuard,): Promise<IResponse> {
         throw new Error("Method not implemented.");
     }
     
