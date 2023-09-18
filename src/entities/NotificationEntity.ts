@@ -48,6 +48,7 @@ NotificationEntity.init({
     sequelize: db.getConnection(), 
     modelName: 'Notification', 
     tableName: 'notifications',
+    timestamps: false,
     underscored: true
 })
 

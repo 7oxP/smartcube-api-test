@@ -17,7 +17,10 @@ describe("test cloud message connection", () => {
     })
 
     it("send notification success", async () => {
-        let res = await cloudMessageService.sendNotification(["token1"], "title test", "desc test", "https://image/1.jpg")
+        let res = await cloudMessageService.sendNotification(["your_registration_token"], "title test", "desc test", "https://image/1.jpg")
+        
+        console.log(res.getMessage()[0])
+        
         assert.ok(res.getStatus())
     })
 })
