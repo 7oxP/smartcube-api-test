@@ -4,5 +4,6 @@ export const OperationStatus = {
     repoErrorModelNotFound: -4,
     cloudStorageError: -2,
     cloudMessagingError: -3,
-    unauthorizedAccess: -5
+    unauthorizedAccess: -5,
+    fieldValidationError: -6,
 }
