@@ -18,7 +18,7 @@ const storeNotification = async function (
 ): Promise<IResponse> {
 
     //1. upload file to cloud storage
-    let uploadResponse = cloudStorageService.uploadFile(file)
+    let uploadResponse = await cloudStorageService.uploadFile(file)
     if(uploadResponse.isFailed()) {
         uploadResponse.setStatusCode(OperationStatus.cloudStorageError)
         return uploadResponse

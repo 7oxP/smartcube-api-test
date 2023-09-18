@@ -2,18 +2,69 @@ import { IResponse } from "@/contracts/usecases/IResponse";
 import { IStorageService } from "@/contracts/usecases/IStorageServices";
 import { Response } from "../../utils/Response";
 import { IUploadedFile } from "@/contracts/IFile";
+import { Storage } from "@google-cloud/storage";
+import path from "path";
+import { OperationStatus } from "../../constants/operations";
 
 export class StorageService implements IStorageService {
-    
-    uploadFile(file: IUploadedFile): IResponse {
-        return new Response()
-        .setStatus(true)
-        .setStatusCode(1)
-        .setMessage("ok")
-        .setData({fileUrl: "https://google.apis/image1.jpg"}) //dummy url
-    }
+  private storage: Storage;
+  private bucketName: string;
 
-    deleteFile(fileUrl: string): IResponse {
-        throw new Error("Method not implemented.");
+  constructor() {
+    const keyFilename = "service_accounts/google_service_account.json";
+    this.storage = new Storage({ keyFilename });
+    this.bucketName = "smartcube-0101";
+  }
+
+  async uploadFile(file: IUploadedFile): Promise<IResponse> {
+    try {
+      await this.storage
+        .bucket(this.bucketName)
+        .file(file.originalname)
+        .save(file.buffer);
+
+      console.log(`${file.originalname} uploaded to ${this.bucketName}`);
+
+      return new Response()
+        .setStatus(true)
+        .setStatusCode(OperationStatus.success)
+        .setMessage("ok")
+        .setData({
+          fileUrl: `https://storage.cloud.google.com/${this.bucketName}/${file.originalname}`,
+          fileName: file.originalname,
+          bucketName: this.bucketName,
+        });
+    } catch (error: any) {
+      return new Response()
+        .setStatus(false)
+        .setStatusCode(OperationStatus.cloudStorageError)
+        .setMessage(error)
+        .setData({});
     }
+  }
+
+  async deleteFile(fileUrl: string): Promise<IResponse> {
+    const bucketData = fileUrl.split("/");
+
+    const fileName = bucketData[4];
+
+    try {
+      await this.storage.bucket(this.bucketName).file(fileName).delete();
+      console.log(`${fileUrl} deleted`);
+
+      return new Response()
+        .setStatus(true)
+        .setStatusCode(OperationStatus.success)
+        .setMessage("ok")
+        .setData({ fileName: fileName, bucketName: this.bucketName });
+
+    } catch (error: any) {
+
+      return new Response()
+        .setStatus(false)
+        .setStatusCode(OperationStatus.cloudStorageError)
+        .setMessage(error)
+        .setData({});
+    }
+  }
 }
