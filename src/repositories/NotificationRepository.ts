@@ -34,6 +34,32 @@ class NotificationRepository implements INotificationRepositories {
         }
     }
 
+    async fetchAll(userId: number): Promise<IResponse> {
+        try {
+            let notifData = await NotificationEntity.findAll({ where: { user_id: userId } })
+            // if (notifData == null) {
+            //     return new Response()
+            //         .setStatus(false)
+            //         .setStatusCode(OperationStatus.repoErrorModelNotFound)
+            //         .setMessage("model not found!")
+            //         .setData({})
+            // }
+
+            return new Response()
+                .setStatus(true)
+                .setStatusCode(OperationStatus.success)
+                .setMessage("ok")
+                .setData(notifData)
+
+        } catch (error: any) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.repoError)
+                .setMessage(error)
+                .setData({})
+        }
+    }
+
     async find(id: number): Promise<IResponse> {
         try {
             let notifData = await NotificationEntity.findOne({ where: { id: id } })
@@ -69,7 +95,7 @@ class NotificationRepository implements INotificationRepositories {
                 .setStatus(true)
                 .setStatusCode(OperationStatus.success)
                 .setMessage("ok")
-                .setData(res)
+                .setData({})
 
         } catch (error: any) {
             return new Response()
