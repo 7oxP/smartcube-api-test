@@ -18,6 +18,9 @@ export function runHttpHandlers(
     const notifHandler = new NotificationHandlers(notificationService)
 
     app.post('/notification', async (req: Request, res: Response) => notifHandler.storeNotificationHandler(req, res))
+    app.get('/notification', async (req: Request, res: Response) => notifHandler.fetchAllNotificationHandler(req, res))
+    app.get('/notification/:id', async (req: Request, res: Response) => notifHandler.viewNotificationHandler(req, res))
+    app.delete('/notification/:id', async (req: Request, res: Response) => notifHandler.deleteNotificationHandler(req, res))
 
     //Listening 
     app.listen(port, () => {
