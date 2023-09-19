@@ -18,58 +18,77 @@ class NotificationHandlers {
 
     async storeNotificationHandler(req: ExpressRequest, res: ExpressResponse) {
 
-        //0. validate request
-        const result = await checkSchema({
-            // image: { notEmpty: true,  },
-            title: { notEmpty: true, },
-            description: { notEmpty: true, }
-        }).run(req);
+        try {
+            //0. validate request
+            const result = await checkSchema({
+                // image: { notEmpty: true,  },
+                title: { notEmpty: true, },
+                description: { notEmpty: true, }
+            }).run(req);
 
-        for (const validation of result) {
-            if (!validation.isEmpty()) {
+            for (const validation of result) {
+                if (!validation.isEmpty()) {
+                    return res.json((new Response())
+                        .setStatus(false)
+                        .setStatusCode(OperationStatus.fieldValidationError)
+                        .setMessage(`${validation.array()[0].msg} on field ${validation.context.fields[0]}`)
+                    )
+                }
+            }
+
+            //temporary validate image files
+            if (req.files == null && req.files == undefined) {
                 return res.json((new Response())
                     .setStatus(false)
                     .setStatusCode(OperationStatus.fieldValidationError)
-                    .setMessage(`${validation.array()[0].msg} on field ${validation.context.fields[0]}`)
+                    .setMessage(`invalid on field image`)
                 )
             }
-        }
 
-        //temporary validate image files
-        if (req.files == null && req.files == undefined) {
+            const file = req.files!.image as UploadedFile
+
+            if (!(file.mimetype in [])) {
+                return res.json((new Response())
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.fieldValidationError)
+                    .setMessage(`invalid on field image`)
+                )
+            }
+
+            //1. extract jwt
+
+            //2. build authGuard
+            const authGuard = new AuthGuard(1, "ppi-dev@gmail.com", "ppi dev", UserRoles.Admin)
+
+            //3. parsing file multipart/form-data
+
+            const uploadedFile: IUploadedFile = {
+                buffer: file.data,
+                originalname: file.name,
+                mimetype: file.mimetype
+            }
+
+            //4. execute
+            const notifResponse = await this.notificationService.storeNotification(
+                authGuard,
+                uploadedFile,
+                req.body.title,
+                req.body.description)
+
+            if (notifResponse.isFailed()) {
+                return res.json(notifResponse).status(400)
+            }
+
+            return res.json(notifResponse).status(200)
+
+        } catch (error: any) {
             return res.json((new Response())
                 .setStatus(false)
                 .setStatusCode(OperationStatus.fieldValidationError)
-                .setMessage(`invalid on field image`)
+                .setMessage(error)
             )
         }
 
-        //1. extract jwt
-
-        //2. build authGuard
-        const authGuard = new AuthGuard(1, "ppi-dev@gmail.com", "ppi dev", UserRoles.Admin)
-
-        //3. parsing file multipart/form-data
-        const file = req.files!.image as UploadedFile
-
-        const uploadedFile: IUploadedFile = {
-            buffer: file.data,
-            originalname: file.name,
-            mimetype: file.mimetype
-        }
-
-        //4. execute
-        const notifResponse = await this.notificationService.storeNotification(
-            authGuard,
-            uploadedFile,
-            req.body.title,
-            req.body.description)
-
-        if (notifResponse.isFailed()) {
-            return res.json(notifResponse).status(400)
-        }
-
-        return res.json(notifResponse).status(200)
 
     }
 
