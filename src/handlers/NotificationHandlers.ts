@@ -25,8 +25,8 @@ class NotificationHandlers {
             description: { notEmpty: true, }
         }).run(req);
 
-        for(const validation of result) {
-            if(!validation.isEmpty()) {
+        for (const validation of result) {
+            if (!validation.isEmpty()) {
                 return res.json((new Response())
                     .setStatus(false)
                     .setStatusCode(OperationStatus.fieldValidationError)
@@ -35,11 +35,20 @@ class NotificationHandlers {
             }
         }
 
+        //temporary validate image files
+        if (req.files == null && req.files == undefined) {
+            return res.json((new Response())
+                .setStatus(false)
+                .setStatusCode(OperationStatus.fieldValidationError)
+                .setMessage(`invalid on field image`)
+            )
+        }
+
         //1. extract jwt
-    
+
         //2. build authGuard
         const authGuard = new AuthGuard(1, "ppi-dev@gmail.com", "ppi dev", UserRoles.Admin)
-    
+
         //3. parsing file multipart/form-data
         const file = req.files!.image as UploadedFile
 
@@ -48,38 +57,38 @@ class NotificationHandlers {
             originalname: file.name,
             mimetype: file.mimetype
         }
-            
+
         //4. execute
         const notifResponse = await this.notificationService.storeNotification(
-            authGuard, 
-            uploadedFile, 
-            req.body.title, 
+            authGuard,
+            uploadedFile,
+            req.body.title,
             req.body.description)
 
-        if(notifResponse.isFailed()) {
+        if (notifResponse.isFailed()) {
             return res.json(notifResponse).status(400)
         }
 
         return res.json(notifResponse).status(200)
-    
+
     }
 
     async fetchAllNotificationHandler(req: ExpressRequest, res: ExpressResponse) {
 
         //1. extract jwt
-    
+
         //2. build authGuard
         const authGuard = new AuthGuard(1, "ppi-dev@gmail.com", "ppi dev", UserRoles.Admin)
 
         //3. execute
         const fetchResponse = await this.notificationService.fetchAllNotification(authGuard)
 
-        if(fetchResponse.isFailed()) {
+        if (fetchResponse.isFailed()) {
             return res.json(fetchResponse).status(400)
         }
 
         return res.json(fetchResponse).status(200)
-        
+
     }
 
     async viewNotificationHandler(req: ExpressRequest, res: ExpressResponse) {
@@ -89,8 +98,8 @@ class NotificationHandlers {
             id: { notEmpty: true, isNumeric: true },
         }, ['params']).run(req);
 
-        for(const validation of result) {
-            if(!validation.isEmpty()) {
+        for (const validation of result) {
+            if (!validation.isEmpty()) {
                 return res.json((new Response())
                     .setStatus(false)
                     .setStatusCode(OperationStatus.fieldValidationError)
@@ -102,14 +111,14 @@ class NotificationHandlers {
         const notifId = parseInt(req.params.id)
 
         //1. extract jwt
-    
+
         //2. build authGuard
         const authGuard = new AuthGuard(1, "ppi-dev@gmail.com", "ppi dev", UserRoles.Admin)
 
         //3. execute
         const viewResponse = await this.notificationService.viewNotification(authGuard, notifId)
 
-        if(viewResponse.isFailed()) {
+        if (viewResponse.isFailed()) {
             return res.json(viewResponse).status(400)
         }
 
@@ -123,8 +132,8 @@ class NotificationHandlers {
             id: { notEmpty: true, isNumeric: true },
         }, ['params']).run(req);
 
-        for(const validation of result) {
-            if(!validation.isEmpty()) {
+        for (const validation of result) {
+            if (!validation.isEmpty()) {
                 return res.json((new Response())
                     .setStatus(false)
                     .setStatusCode(OperationStatus.fieldValidationError)
@@ -136,14 +145,14 @@ class NotificationHandlers {
         const notifId = parseInt(req.params.id)
 
         //1. extract jwt
-    
+
         //2. build authGuard
         const authGuard = new AuthGuard(1, "ppi-dev@gmail.com", "ppi dev", UserRoles.Admin)
 
         //3. execute
         const deleteResponse = await this.notificationService.deleteNotification(authGuard, notifId)
 
-        if(deleteResponse.isFailed()) {
+        if (deleteResponse.isFailed()) {
             return res.json(deleteResponse).status(400)
         }
 
