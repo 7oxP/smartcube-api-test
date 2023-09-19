@@ -9,21 +9,19 @@ const viewNotification = async function(
     notifRepo: INotificationRepositories, 
     notificationId: number): Promise<IResponse> {
 
-    const notifData = await notifRepo.find(notificationId)
+    const notifResponse = await notifRepo.find(notificationId)
 
-    if(notifData.getData().user_id != authGuard.getUserId()) {
-        return new Response()
+    if(notifResponse.isFailed()) return notifResponse
+
+    if(notifResponse.getData().user_id != authGuard.getUserId()) {
+        return notifResponse
         .setStatus(false)
         .setStatusCode(OperationStatus.unauthorizedAccess)
         .setMessage("unauthorized")
         .setData({})
     }
 
-    return new Response()
-        .setStatus(true)
-        .setStatusCode(OperationStatus.success)
-        .setMessage("ok")
-        .setData(notifData)
+    return notifResponse
 }
 
 export { viewNotification };
