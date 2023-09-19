@@ -12,7 +12,7 @@ export class StorageService implements IStorageService {
 
   constructor() {
     const keyFilename = `${process.env.GOOGLE_APPLICATION_CREDENTIALS}`
-    this.storage = new Storage({ keyFilename })
+    this.storage = new Storage({ keyFilename }) 
     this.bucketName = `${process.env.BUCKET_NAME}`
   }
 
