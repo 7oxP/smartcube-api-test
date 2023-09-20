@@ -32,7 +32,7 @@ const storeNotification = async function (
     }
     
     //3. broadcast notification to registered devices
-    cloudMessageService.sendNotification([""], title, description, uploadResponse.getData().fileUrl)
+    cloudMessageService.sendNotification([], title, description, uploadResponse.getData().fileUrl)
 
     return new Response()
         .setStatus(true)
