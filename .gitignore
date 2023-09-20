@@ -133,4 +133,5 @@ build/
 
 src/database/db.config.json
 
-service_accounts
+service_accounts/*
+!service_accounts/.gitkeep
