@@ -5,8 +5,6 @@ import fs from "fs";
 import { StorageService } from "../../src/usecases/storage/StorageService";
 import { IStorageService } from "../../src/contracts/usecases/IStorageServices";
 import { IUploadedFile } from "../../src/contracts/IFile";
-import { Storage } from "@google-cloud/storage";
-import { IResponse } from "../../src/contracts/usecases/IResponse";
 import { OperationStatus } from "../../src/constants/operations";
 
 dotenv.config();
