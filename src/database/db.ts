@@ -25,7 +25,10 @@ export class Database {
                 console.log('Connect using socket')
                 this.conn = new Sequelize(this.dbName, this.user, this.password, {
                     dialect: 'mysql',
-                    host: this.host
+                    host: this.host,
+                    dialectOptions: {
+                        socketPath: this.host
+                    }
                 });
                 this.conn.authenticate()
             } else {
