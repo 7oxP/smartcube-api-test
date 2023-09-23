@@ -1,6 +1,8 @@
-import assert from "assert";
 import { Database } from "../../src/database/db";
-import { log } from "console";
+import dotenv from 'dotenv'
+import assert from "assert";
+
+dotenv.config()
 
 describe("test get connection", () => {
   const db: Database = new Database(
@@ -12,7 +14,7 @@ describe("test get connection", () => {
   process.env.DB_DIALECT!,
   );
 
-  it("connect success", () => {
+  it("connect success", async () => {
     db.connect();
     assert.notEqual(db.getConnection(), null);
   });
