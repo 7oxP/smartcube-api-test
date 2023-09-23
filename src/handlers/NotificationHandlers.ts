@@ -47,7 +47,7 @@ class NotificationHandlers {
 
             const file = req.files!.image as UploadedFile
 
-            if (!(file.mimetype in ['image/png', 'image/jpg', 'image/jpeg'])) {
+            if (!(['image/png', 'image/jpg', 'image/jpeg'].includes(file.mimetype))) {
                 return res.json((new Response())
                     .setStatus(false)
                     .setStatusCode(OperationStatus.fieldValidationError)
