@@ -32,6 +32,7 @@ export class Database {
                 });
                 this.conn.authenticate()
             } else {
+                console.log('wkwk', process.env)
                 console.log('Connect using URI')
                 this.conn = new Sequelize(`${this.dialect}://${this.user}:${this.password}@${this.host}:${this.port}/${this.dbName}`)
                 this.conn.authenticate()
