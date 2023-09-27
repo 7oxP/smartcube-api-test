@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 import assert from "assert";
 
 dotenv.config()
-console.log('wkwk', process.env)
+
 describe("test get connection", () => {
   const db: Database = new Database(
   process.env.DB_USER!,
