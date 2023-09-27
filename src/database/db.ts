@@ -19,7 +19,7 @@ export class Database {
         this.dialect = dialect
     }
 
-    connect(): void {
+    async connect(): Promise<void> {
         try {
             if (process.env.APP_ENV != 'local') {
                 console.log('Connect using socket')
@@ -30,12 +30,12 @@ export class Database {
                         socketPath: this.host
                     }
                 });
-                this.conn.authenticate()
+                await this.conn.authenticate()
             } else {
                 console.log('wkwk', process.env)
                 console.log('Connect using URI')
                 this.conn = new Sequelize(`${this.dialect}://${this.user}:${this.password}@${this.host}:${this.port}/${this.dbName}`)
-                this.conn.authenticate()
+                await this.conn.authenticate()
             }
         } catch (error) {
             throw new Error('Unable to connect to the database: ' + error)

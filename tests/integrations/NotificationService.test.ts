@@ -38,7 +38,7 @@ let notificationService: INotificationService;
 beforeAll(async () => {
 
   //Connect db
-  db.connect()
+  await db.connect()
 
   //create dummy user with id 1
   db.getConnection().query('DELETE FROM notifications')
