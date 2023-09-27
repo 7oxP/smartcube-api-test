@@ -13,7 +13,8 @@ steps:
       - 'APP_PORT=${_APP_PORT}'
       - 'DB_HOST=${_DB_HOST}'
       - 'DB_PORT=${_DB_PORT}'
-      - 'DB_USER=${_DB_PASSWORD}'
+      - 'DB_USER=${_DB_USER}'
+      - 'DB_PASSWORD=${_DB_PASS}'
       - 'DB_DIALECT=${_DB_DIALECT}'
       - 'BUCKET_NAME=${_BUCKET_NAME}'
   - name: gcr.io/cloud-builders/docker
