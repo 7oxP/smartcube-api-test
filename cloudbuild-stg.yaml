@@ -15,7 +15,6 @@ steps:
       - 'DB_PORT=${_DB_PORT}'
       - 'DB_USER=${_DB_PASSWORD}'
       - 'DB_DIALECT=${_DB_DIALECT}'
-      - 'GOOGLE_APPLICATION_CREDENTIALS=${_GOOGLE_APPLICATION_CREDENTIALS}'
       - 'BUCKET_NAME=${_BUCKET_NAME}'
   - name: gcr.io/cloud-builders/docker
     args:
