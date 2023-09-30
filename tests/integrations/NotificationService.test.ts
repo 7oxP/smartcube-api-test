@@ -41,7 +41,7 @@ beforeAll(async () => {
   await db.connect()
 
   //create dummy user with id 1
-  db.getConnection().query('DELETE FROM notifications')
+  db.getConnection().query('DELETE FROM notifications WHERE user_id = 1000')
   db.getConnection().query('DELETE FROM users WHERE id = 1000')
 
   db.getConnection().query("INSERT INTO users (id, username, email, password) VALUES (1000, 'iyan', 'iyan@mail.com', 'pass123')")
@@ -60,7 +60,7 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
-  db.getConnection().query('DELETE FROM notifications')
+  db.getConnection().query('DELETE FROM notifications WHERE user_id = 1000')
   db.getConnection().query('DELETE FROM users WHERE id = 1000')
 })
 
