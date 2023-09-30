@@ -40,8 +40,10 @@ export class Database {
       } else {
         console.log("Connect using URI");
         this.conn = new Sequelize(
-          `${this.dialect}://${this.user}:${this.password}@${this.host}:${this.port}/${this.dbName}`
-        );
+          `${this.dialect}://${this.user}:${this.password}@${this.host}:${this.port}/${this.dbName}`,
+          {
+            ssl: false
+          });
         await this.conn.authenticate();
       }
     } catch (error) {
