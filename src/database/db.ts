@@ -26,7 +26,6 @@ export class Database {
   }
 
   async connect(): Promise<void> {
-    console.log("wkwk", process.env)
     try {
       if (process.env.APP_ENV != "local") {
         console.log("Connect using socket");
