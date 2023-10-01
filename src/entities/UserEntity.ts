@@ -24,6 +24,23 @@ UserEntity.init({
     type: DataTypes.TEXT,
     allowNull: false
   },
+  reset_token: {
+    type: DataTypes.STRING(12),
+    allowNull: true
+  },
+  is_verified: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
+  },
+  verification_code: {
+    type: DataTypes.STRING(6),
+    allowNull: true
+  },
+  fcm_registration_token: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  }
 }, {
   sequelize: db.getConnection(),
   modelName: 'User',
