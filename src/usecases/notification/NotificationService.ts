@@ -49,6 +49,13 @@ class NotificationService implements INotificationService {
     deleteNotification(authGuard: IAuthGuard, id: number): Promise<IResponse> {
         return deleteNotification(authGuard, this.notifRepo, id)
     }
+
+    sendResetPasswordToken(email: String, resetToken: String): Promise<IResponse> {
+        throw new Error("Method not implemented.");
+    }
+    sendSignUpVerificationCode(email: String, code: String): Promise<IResponse> {
+        throw new Error("Method not implemented.");
+    }
 }
 
 export { NotificationService }
