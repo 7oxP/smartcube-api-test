@@ -29,7 +29,7 @@ export class StorageService implements IStorageService {
         .setStatusCode(OperationStatus.success)
         .setMessage("ok")
         .setData({
-          fileUrl: `https://storage.cloud.google.com/${this.bucketName}/${file.originalname}`,
+          fileUrl: `https://storage.googleapis.com/${this.bucketName}/${file.originalname}`,
           fileName: file.originalname,
           bucketName: this.bucketName,
         })

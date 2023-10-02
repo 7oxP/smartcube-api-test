@@ -4,6 +4,8 @@ import fs from "fs";
 
 import { NotificationRepository } from "../../src/repositories/NotificationRepository";
 import { INotificationRepositories } from "../../src/contracts/repositories/INotificationRepositories";
+import { IUserRepository } from '../../src/contracts/repositories/IUserRepository';
+import { UserRepository } from '../../src/repositories/UserRepository';
 import { CloudMessagingService } from "../../src/usecases/cloudMessage/CloudMessagingService";
 import { ICloudMessagingService } from "../../src/contracts/usecases/ICloudMessagingService";
 import { StorageService } from "../../src/usecases/storage/StorageService";
@@ -27,32 +29,36 @@ let db: Database = new Database(
   process.env.DB_DIALECT!,
 )
 
+let userRepository: IUserRepository
 let notificationRepository: INotificationRepositories;
 let cloudStorageService: IStorageService;
 let cloudMessageService: ICloudMessagingService;
 let notificationService: INotificationService;
-
-
-
 
 beforeAll(async () => {
 
   //Connect db
   await db.connect()
 
-  //create dummy user with id 1
+  db.getConnection().query('DELETE FROM user_groups WHERE device_id = 1000')
   db.getConnection().query('DELETE FROM notifications WHERE user_id = 1000')
   db.getConnection().query('DELETE FROM users WHERE id = 1000')
+  db.getConnection().query('DELETE FROM devices WHERE id = 1000')
 
+  //create dummy data user, notification, devices, and user_groups with id 1000
   db.getConnection().query("INSERT INTO users (id, username, email, password) VALUES (1000, 'iyan', 'iyan@mail.com', 'pass123')")
   db.getConnection().query("INSERT INTO notifications (id, user_id, title, image, description, is_viewed, created_at, updated_at) VALUES " +
     `(1000,  1000, 'title 1', 'image 1', 'description 1', 0, '2023-09-09', '2023-09-09')`)
+  db.getConnection().query("INSERT INTO devices (id, vendor_number, vendor_name) VALUES (1000, 'NUC 1001', 'INTEL')")
+  db.getConnection().query("INSERT INTO user_groups (user_id, device_id, role_id) VALUES (1000, 1000, 1)")
 
   //Instantiate services
+  userRepository = new UserRepository()
   notificationRepository = new NotificationRepository();
   cloudStorageService = new StorageService();
   cloudMessageService = new CloudMessagingService();
   notificationService = new NotificationService(
+    userRepository,
     notificationRepository,
     cloudMessageService,
     cloudStorageService
@@ -60,6 +66,8 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
+  db.getConnection().query('DELETE FROM user_groups WHERE device_id = 1000')
+  db.getConnection().query('DELETE FROM devices WHERE id = 1000')
   db.getConnection().query('DELETE FROM notifications WHERE user_id = 1000')
   db.getConnection().query('DELETE FROM users WHERE id = 1000')
 })
@@ -76,7 +84,7 @@ const file: IUploadedFile = {
 let storedNotificationID = 0
 
 
-describe("store notifs", () => {
+describe("store notificationss", () => {
 
   it("Store failed with user id invalid", async () => {
 
@@ -90,6 +98,8 @@ describe("store notifs", () => {
       "wew1",
       "wew1 desc"
     );
+
+    console.log(resp.getStatusCode())
 
     //assert
     assert.equal(resp.getStatus(), false);
@@ -167,14 +177,6 @@ describe("delete notification", () => {
   });
 
   it("success", async () => {
-    //create dummy data
-    // const storeRes = await notificationService.storeNotification(
-    //   authGuard,
-    //   file,
-    //   "wew1",
-    //   "wew1 desc"
-    // );
-
     //delete notif
     const res = await notificationService.deleteNotification(
       authGuard,
