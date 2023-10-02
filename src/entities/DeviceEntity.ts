@@ -1,5 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import { db } from "./BaseEntity";
+import UserGroupEntity from "./UserGroup";
 
 class DeviceEntity extends Model {}
 
@@ -25,5 +26,7 @@ DeviceEntity.init({
     timestamps: false,
     underscored: true
 })
+
+DeviceEntity.hasMany(UserGroupEntity, {foreignKey: 'device_id'})
 
 export default DeviceEntity

@@ -9,27 +9,32 @@ import { IAuthGuard } from "@/contracts/middleware/AuthGuard";
 import { viewNotification } from "./ViewNotification";
 import { deleteNotification } from "./DeleteNotification";
 import { fetchAllNotification } from "./FetchAllNotification";
+import { IUserRepository } from "@/contracts/repositories/IUserRepository";
 
 class NotificationService implements INotificationService {
 
     notifRepo: INotificationRepositories
+    userRepo: IUserRepository
     cloudMessageService: ICloudMessagingService
     cloudStorageService: IStorageService
 
     constructor(
+        userRepo: IUserRepository,
         notifRepo: INotificationRepositories, 
         cloudMessageService: ICloudMessagingService,
-        cloudStorageService: IStorageService
+        cloudStorageService: IStorageService,
     ) {
         this.notifRepo = notifRepo;
         this.cloudMessageService = cloudMessageService;
         this.cloudStorageService = cloudStorageService
+        this.userRepo = userRepo
     }
 
     storeNotification(authGuard: IAuthGuard, file: IUploadedFile, title: string, description: string): Promise<IResponse> {
         return storeNotification(
             authGuard,
-            this.notifRepo, 
+            this.notifRepo,
+            this.userRepo, 
             this.cloudMessageService, 
             this.cloudStorageService,
             file,

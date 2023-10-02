@@ -5,4 +5,5 @@ export interface IUserRepository {
     store(email: String, password: String): Promise<IResponse>
     findByVerificationCode(email: String, code: String): Promise<IResponse>
     updateVerificationStatus(email: String, status: boolean): Promise<IResponse>
+    fetchUserByGroup(userId: number, deviceId: number): Promise<IResponse>
 }

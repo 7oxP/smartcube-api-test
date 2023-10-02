@@ -4,6 +4,12 @@
 module.exports = {
   async up (queryInterface, Sequelize) {
     queryInterface.createTable('user_groups', {
+      id: {
+        type: Sequelize.DataTypes.BIGINT.UNSIGNED,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true
+      },
       user_id: {
         type: Sequelize.DataTypes.BIGINT.UNSIGNED,
         // allowNull: false,

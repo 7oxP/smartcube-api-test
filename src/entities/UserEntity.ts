@@ -1,6 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { db } from "./BaseEntity"
 import NotificationEntity from "./NotificationEntity";
+import UserGroupEntity from "./UserGroup";
 
 class UserEntity extends Model { }
 
@@ -45,9 +46,11 @@ UserEntity.init({
   sequelize: db.getConnection(),
   modelName: 'User',
   tableName: 'users',
-  underscored: true
+  underscored: true,
+  timestamps: false
 });
 
 UserEntity.hasMany(NotificationEntity)
+UserEntity.hasMany(UserGroupEntity, { foreignKey: 'user_id'})
 
 export default UserEntity
