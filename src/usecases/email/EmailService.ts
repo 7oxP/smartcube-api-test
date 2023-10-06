@@ -40,7 +40,7 @@ export class EmailService implements IEmailService {
                 to: email,
                 subject: subject,
                 text: body,
-                html: "<b>Hello world?</b>",
+                html: body,
             });
 
             return new Response()
