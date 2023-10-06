@@ -6,4 +6,5 @@ export const OperationStatus = {
     cloudMessagingError: -3,
     unauthorizedAccess: -5,
     fieldValidationError: -6,
+    sendEmailError: -7
 }
