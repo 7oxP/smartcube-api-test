@@ -1,8 +1,8 @@
 import { IResponse } from "./IResponse";
 
 export interface IAuthService {
-    login(email: String, password: String): Promise<IResponse>
-    signUp(email: String, password: String, cPassword: String, phoneNumber: String): Promise<IResponse>
-    resetPasswordRequest(email: String): Promise<IResponse>
-    resetPassword(resetToken: String, password: String, cPassword: String): Promise<IResponse>
+    login(email: string, password: string): Promise<IResponse>
+    signUp(username:string, email: string, password: string, cPassword: string): Promise<IResponse>
+    resetPasswordRequest(email: string): Promise<IResponse>
+    resetPassword(resetToken: string, password: string, cPassword: string): Promise<IResponse>
 }

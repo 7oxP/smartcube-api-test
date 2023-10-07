@@ -1,8 +1,8 @@
 import { IResponse } from "../usecases/IResponse";
 
 export interface IUserRepository {
-    findByEmail(email: String): Promise<IResponse>
-    store(email: String, password: String): Promise<IResponse>
-    findByVerificationCode(email: String, code: String): Promise<IResponse>
-    updateVerificationStatus(email: String, status: boolean): Promise<IResponse>
+    findByEmail(email: string): Promise<IResponse>
+    store(username: string, email: string, password: string, is_verified: boolean): Promise<IResponse>
+    findByVerificationCode(email: string, code: string): Promise<IResponse>
+    updateVerificationStatus(email: string, status: boolean): Promise<IResponse>
 }

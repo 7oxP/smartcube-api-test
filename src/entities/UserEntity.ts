@@ -45,7 +45,7 @@ UserEntity.init({
   sequelize: db.getConnection(),
   modelName: 'User',
   tableName: 'users',
-  underscored: true
+  underscored: true,
 });
 
 UserEntity.hasMany(NotificationEntity)

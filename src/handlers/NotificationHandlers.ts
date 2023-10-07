@@ -94,19 +94,26 @@ class NotificationHandlers {
 
     async fetchAllNotificationHandler(req: ExpressRequest, res: ExpressResponse) {
 
-        //1. extract jwt
-
-        //2. build authGuard
-        const authGuard = new AuthGuard(1, "ppi-dev@gmail.com", "ppi dev", UserRoles.Admin)
-
-        //3. execute
-        const fetchResponse = await this.notificationService.fetchAllNotification(authGuard)
-
-        if (fetchResponse.isFailed()) {
-            return res.json(fetchResponse).status(400)
+        try {
+            //1. extract jwt
+            const userData = (req as any).user
+            console.log('user data:',userData.getData().userId)
+            //2. build authGuard
+            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin)
+            console.log(authGuard)
+            const fetchResponse = await this.notificationService.fetchAllNotification(authGuard)
+            
+            //3. execute
+            if (fetchResponse.isFailed()) {
+                return res.json(fetchResponse).status(400)
+            }
+    
+            return res.json(fetchResponse).status(200)
+        } catch (error:any) {
+            console.log(error)
+            return res.json({error: error})
         }
 
-        return res.json(fetchResponse).status(200)
 
     }
 
