@@ -20,7 +20,12 @@ const storeNotification = async function (
     description: string
 ): Promise<IResponse> {
 
-    //1. upload file to cloud storage
+    const userResponse = await userRepo.findByEmail(authGuard.getUserEmail())
+    if(!userResponse.getStatus()) {
+        return userResponse
+    }
+
+    //1. upload file to cloud storage    
     let uploadResponse = await cloudStorageService.uploadFile(file)
     if(uploadResponse.isFailed()) {
         uploadResponse.setStatusCode(OperationStatus.cloudStorageError)
