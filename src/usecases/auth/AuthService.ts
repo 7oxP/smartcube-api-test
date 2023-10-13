@@ -11,7 +11,7 @@ const dotenv = require("dotenv")
 
 dotenv.config()
 
-export class AuthService implements IAuthService {
+class AuthService implements IAuthService {
   userRepo: IUserRepository
   jwtUtil: IJWTUtil
   hashUtil: IHashUtil
@@ -35,20 +35,23 @@ export class AuthService implements IAuthService {
       const user = await this.userRepo.findByEmail(email)
       console.log("status", user.getStatus())
 
-
       if (!user.getStatus()) {
         user.setMessage("Invalid Credential")
         user.setData(undefined)
         return user
       }
-      
-      const compare = await this.hashUtil.compare(password, user.getData().getDataValue('password'))
-      console.log('compare', compare)
+
+      const compare = await this.hashUtil.compare(
+        password,
+        user.getData().getDataValue("password")
+      )
+      console.log("compare", compare)
       if (!compare.getStatus()) {
+        compare.setStatusCode(-4)
         compare.setMessage("Invalid Credential")
         return compare
       }
-      
+
       const payload = {
         userId: user.getData().getDataValue("id"),
         email: user.getData().getDataValue("email"),
@@ -139,12 +142,11 @@ export class AuthService implements IAuthService {
         return storeUser
       }
       return storeUser
-
-    } catch (error) {
+    } catch (error: any) {
       return new Response()
         .setStatus(false)
         .setStatusCode(OperationStatus.repoError)
-        .setMessage("error")
+        .setMessage(error)
         .setData({})
     }
   }
@@ -158,7 +160,7 @@ export class AuthService implements IAuthService {
         email,
         verification_code
       )
-
+      console.log(checkVerification.getStatus())
       if (checkVerification.getStatus() === false) {
         checkVerification.setMessage("Invalid Code!")
         return checkVerification
@@ -176,7 +178,7 @@ export class AuthService implements IAuthService {
       const getUpdatedUser = await this.userRepo.findByEmail(email)
 
       return getUpdatedUser
-    } catch (error:any) {
+    } catch (error: any) {
       return new Response()
         .setStatus(false)
         .setStatusCode(OperationStatus.repoError)
@@ -198,7 +200,7 @@ export class AuthService implements IAuthService {
         process.env.RESET_TOKEN_SECRET_KEY!,
         "5m"
       )
-        
+
       const setToken = await this.userRepo.storeResetToken(
         email,
         resetToken.getData()
@@ -242,21 +244,16 @@ export class AuthService implements IAuthService {
 
       const hashedPassword = await this.hashUtil.hash(password)
 
-      const updatePassword = await this.userRepo.updatePassword(hashedPassword.getData(), resetToken)
+      const updatePassword = await this.userRepo.updatePassword(
+        hashedPassword.getData(),
+        resetToken
+      )
 
       if (updatePassword.getStatus() === false) {
-        return new Response()
-        .setStatus(false)
-        .setStatusCode(OperationStatus.repoError)
-        .setMessage(updatePassword.getMessage())
-        .setData({})
+        return updatePassword
       }
 
-      return new Response()
-        .setStatus(true)
-        .setStatusCode(OperationStatus.success)
-        .setMessage("success")
-        .setData({})
+      return updatePassword
     } catch (error) {
       return new Response()
         .setStatus(false)
@@ -267,4 +264,6 @@ export class AuthService implements IAuthService {
     // throw new Error("Method not implemented.")
   }
 }
+
+export { AuthService }
 

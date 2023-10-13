@@ -14,7 +14,6 @@ class UserRepository implements IUserRepository {
     try {
       const user = await UserEntity.findOne({ where: { email: email } })
       if (user !== null) {
-        user.setDataValue('password', null)
         return new Response()
           .setStatus(true)
           .setStatusCode(OperationStatus.success)
@@ -54,7 +53,7 @@ class UserRepository implements IUserRepository {
       })
 
       user.setDataValue('password',null)
-      user.setDataValue('verification_code',null)
+      // user.setDataValue('verification_code',null)
 
 
       return new Response()

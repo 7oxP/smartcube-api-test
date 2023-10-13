@@ -15,6 +15,10 @@ import { OperationStatus } from "../../src/constants/operations";
 import { AuthGuard } from "../../src/middleware/AuthGuard";
 import { UserRoles } from "../../src/contracts/middleware/AuthGuard";
 import { Database } from "../../src/database/db";
+import { IEmailService } from '../../src/contracts/usecases/IEmailService'
+import { EmailService } from '../../src/usecases/email/EmailService'
+
+
 
 dotenv.config();
 
@@ -31,6 +35,7 @@ let notificationRepository: INotificationRepositories;
 let cloudStorageService: IStorageService;
 let cloudMessageService: ICloudMessagingService;
 let notificationService: INotificationService;
+let emailService: IEmailService
 
 
 
@@ -52,10 +57,12 @@ beforeAll(async () => {
   notificationRepository = new NotificationRepository();
   cloudStorageService = new StorageService();
   cloudMessageService = new CloudMessagingService();
+  emailService = new EmailService('smtp.gmail.com',587,'smartcubeppi@gmail.com','ispt ujxo avvo hpoz','smartcubeppi@gmail.com')
   notificationService = new NotificationService(
     notificationRepository,
     cloudMessageService,
-    cloudStorageService
+    cloudStorageService,
+    emailService
   );
 });
 
