@@ -1,13 +1,9 @@
-import { JWTUtil } from "@/utils/JWTUtil"
 import { IJWTUtil } from "../contracts/utils/IJWTUtil"
-import { IResponse } from "@/contracts/usecases/IResponse"
 import { Response } from "../utils/Response"
 import { OperationStatus } from "../constants/operations"
 
 
 import { NextFunction, Request, Response as ExpressResponse } from "express"
-import { decode } from "punycode"
-const jwt = require("jsonwebtoken")
 
 export class AuthJWT {
   private secretKey: string
@@ -20,9 +16,9 @@ export class AuthJWT {
   authenticateToken = async (req: Request, res: ExpressResponse, next: NextFunction) => {
     const token = req.header("Authorization")
 
-    console.log(token)
+    const decodedToken = await this.jwtUtil.decode(token!, this.secretKey);
 
-    if(!token){
+    if(!token || !decodedToken.getStatus()){
       return res.json(
       new Response()
       .setStatus(false)
@@ -31,9 +27,8 @@ export class AuthJWT {
       .setData({})).status(401)
     }
 
-    const decode = await this.jwtUtil.decode(token!, this.secretKey);
-    (req as any).user = decode
-    console.log('decode: ', decode.getData())
+    (req as any).user = decodedToken
+    console.log('decode: ', decodedToken.getData())
     next()
 
   }

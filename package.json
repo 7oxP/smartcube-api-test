@@ -21,6 +21,7 @@
     "@types/express-fileupload": "^1.4.1",
     "@types/jest": "^29.5.4",
     "@types/node": "^20.6.0",
+    "@types/nodemailer": "^6.4.11",
     "@types/sequelize": "^4.28.15",
     "assert": "^2.1.0",
     "babel-jest": "^29.7.0",
@@ -33,6 +34,7 @@
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "date-fns": "^2.30.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-fileupload": "^1.4.0",
@@ -41,6 +43,7 @@
     "firebase-admin": "^11.10.1",
     "mariadb": "^3.2.0",
     "mysql2": "^3.6.1",
+    "nodemailer": "^6.9.6",
     "sequelize": "^6.33.0"
   }
 }

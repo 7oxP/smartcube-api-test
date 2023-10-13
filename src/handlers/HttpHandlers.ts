@@ -27,15 +27,18 @@ export function runHttpHandlers(
     const notifHandler = new NotificationHandlers(notificationService)
     const authHandler = new AuthHandlers(authService)
     const jwtMiddleware = new AuthJWT(process.env.JWT_SECRET_KEY!, jwtUtil)
+    const jwtMiddlewareResetReq = new AuthJWT(process.env.RESET_TOKEN_SECRET_KEY!, jwtUtil)
 
-    app.post('/notification', async (req: Request, res: Response) => notifHandler.storeNotificationHandler(req, res))
+    app.post('/notification', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => notifHandler.storeNotificationHandler(req, res))
     app.get('/notification', jwtMiddleware.authenticateToken , async (req: Request, res: Response) => notifHandler.fetchAllNotificationHandler(req, res))
-    app.get('/notification/:id', async (req: Request, res: Response) => notifHandler.viewNotificationHandler(req, res))
-    app.delete('/notification/:id', async (req: Request, res: Response) => notifHandler.deleteNotificationHandler(req, res))
-    app.get('/login', async (req:Request, res: Response) => res.send("Halaman login"))
+    app.get('/notification/:id', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => notifHandler.viewNotificationHandler(req, res))
+    app.delete('/notification/:id', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => notifHandler.deleteNotificationHandler(req, res))
     app.post('/login', async (req:Request, res: Response) => authHandler.loginHandler(req, res))
-    app.get('/signup', async (req:Request, res: Response) => res.send("Halaman sign up"))
     app.post('/signup', async (req:Request, res: Response) => authHandler.signUpHandler(req, res))
+    app.post('/verification', async (req:Request, res: Response) => authHandler.verificationHandler(req, res))
+    app.post('/reset-password-request', async (req:Request, res: Response) => authHandler.resetPasswordReq(req, res))
+    app.post('/reset-password', jwtMiddlewareResetReq.authenticateToken, async (req:Request, res: Response) => authHandler.resetPassword(req, res))
+
     //Listening 
     app.listen(port, () => {
         console.log(`app listening on port ${port}`)

@@ -24,20 +24,18 @@ export class HashUtil implements IHashUtil {
     }
   }
 
-  async compare(hashedPayload: string, payload: string): Promise<IResponse> {
+  async compare(payload: string, hashedPayload: string): Promise<IResponse> {
     try {
       const match = await bcrypt.compare(payload, hashedPayload)
       return new Response()
-        .setStatus(true)
+        .setStatus(match)
         .setStatusCode(OperationStatus.success)
         .setMessage("ok")
-        .setData(match)
     } catch (error: any) {
       return new Response()
         .setStatus(false)
         .setStatusCode(OperationStatus.fieldValidationError)
         .setMessage(error)
-        .setData({ error: error })
     }
   }
 }

@@ -51,4 +51,65 @@ export class AuthHandlers {
         .status(400)
     }
   }
+
+  async verificationHandler(req: ExpressRequest, res: ExpressResponse) {
+    try {
+      const verification = await this.authService.checkVerificationCode(
+        req.body.email,
+        req.body.verificationCode
+      )
+      console.log(verification)
+      return res.json(verification).status(200)
+    } catch (error: any) {
+      return res
+        .json(
+          new Response()
+            .setStatus(false)
+            .setStatusCode(OperationStatus.fieldValidationError)
+            .setMessage(error)
+        )
+        .status(400)
+    }
+  }
+
+  async resetPasswordReq(req: ExpressRequest, res: ExpressResponse) {
+    try {
+      const resetRequest = await this.authService.resetPasswordRequest(
+        req.body.email
+      )
+      console.log(resetRequest)
+      return res.json(resetRequest).status(200)
+    } catch (error: any) {
+      return res
+        .json(
+          new Response()
+            .setStatus(false)
+            .setStatusCode(OperationStatus.fieldValidationError)
+            .setMessage(error)
+        )
+        .status(400)
+    }
+  }
+
+  async resetPassword(req: ExpressRequest, res: ExpressResponse) {
+    try {
+      const reset = await this.authService.resetPassword(
+        req.header("Authorization")!,
+        req.body.password,
+        req.body.cPassword
+      )
+      console.log('reset',reset)
+      return res.json(reset).status(200)
+    } catch (error: any) {
+      return res
+        .json(
+          new Response()
+            .setStatus(false)
+            .setStatusCode(OperationStatus.fieldValidationError)
+            .setMessage(error)
+        )
+        .status(400)
+    }
+  }
 }
+

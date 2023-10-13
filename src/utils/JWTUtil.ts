@@ -7,9 +7,9 @@ import { OperationStatus } from "../constants/operations"
 export class JWTUtil implements IJWTUtil {
   constructor() {}
 
-  async encode(payload: object, secretKey: string): Promise<IResponse> {
+  async encode(payload: object, secretKey: string, time: string): Promise<IResponse> {
     try {
-      const signed = await jwt.sign(payload, secretKey, { expiresIn: "5m" })
+      const signed = await jwt.sign(payload, secretKey, { expiresIn: time })
       return new Response()
         .setStatus(true)
         .setStatusCode(OperationStatus.success)

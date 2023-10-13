@@ -1,5 +1,7 @@
-import { IResponse } from "./IResponse";
+import { IResponse } from "./IResponse"
 
 export interface IEmailService {
-    sendEmail(title: String, subject: String, body: String): Promise<IResponse>
+  sendEmail(email: string, subject: string, body: string): Promise<IResponse>
+  closeService(): void
 }
+

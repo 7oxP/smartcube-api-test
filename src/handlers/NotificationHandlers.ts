@@ -56,9 +56,11 @@ class NotificationHandlers {
             }
 
             //1. extract jwt
+            const userData = (req as any).user
+
 
             //2. build authGuard
-            const authGuard = new AuthGuard(1, "ppi-dev@gmail.com", "ppi dev", UserRoles.Admin)
+            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin)
 
             //3. parsing file multipart/form-data
 
@@ -97,7 +99,7 @@ class NotificationHandlers {
         try {
             //1. extract jwt
             const userData = (req as any).user
-            console.log('user data:',userData.getData().userId)
+            // console.log('user data:',userData.getData().userId)
             //2. build authGuard
             const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin)
             console.log(authGuard)
@@ -137,9 +139,10 @@ class NotificationHandlers {
         const notifId = parseInt(req.params.id)
 
         //1. extract jwt
+        const userData = (req as any).user
 
         //2. build authGuard
-        const authGuard = new AuthGuard(1, "ppi-dev@gmail.com", "ppi dev", UserRoles.Admin)
+        const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin)
 
         //3. execute
         const viewResponse = await this.notificationService.viewNotification(authGuard, notifId)
@@ -171,9 +174,10 @@ class NotificationHandlers {
         const notifId = parseInt(req.params.id)
 
         //1. extract jwt
+        const userData = (req as any).user
 
         //2. build authGuard
-        const authGuard = new AuthGuard(1, "ppi-dev@gmail.com", "ppi dev", UserRoles.Admin)
+        const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin)
 
         //3. execute
         const deleteResponse = await this.notificationService.deleteNotification(authGuard, notifId)
