@@ -10,6 +10,7 @@ import { viewNotification } from "./ViewNotification";
 import { deleteNotification } from "./DeleteNotification";
 import { fetchAllNotification } from "./FetchAllNotification";
 import { IUserRepository } from "@/contracts/repositories/IUserRepository";
+import { IEmailService } from "@/contracts/usecases/IEmailService";
 
 class NotificationService implements INotificationService {
 
@@ -17,17 +18,20 @@ class NotificationService implements INotificationService {
     userRepo: IUserRepository
     cloudMessageService: ICloudMessagingService
     cloudStorageService: IStorageService
+    emailService: IEmailService
 
     constructor(
         userRepo: IUserRepository,
         notifRepo: INotificationRepositories, 
         cloudMessageService: ICloudMessagingService,
         cloudStorageService: IStorageService,
+        emailService: IEmailService
     ) {
         this.notifRepo = notifRepo;
         this.cloudMessageService = cloudMessageService;
         this.cloudStorageService = cloudStorageService
         this.userRepo = userRepo
+        this.emailService = emailService
     }
 
     storeNotification(authGuard: IAuthGuard, file: IUploadedFile, title: string, description: string): Promise<IResponse> {
@@ -55,11 +59,11 @@ class NotificationService implements INotificationService {
         return deleteNotification(authGuard, this.notifRepo, id)
     }
 
-    sendResetPasswordToken(email: String, resetToken: String): Promise<IResponse> {
-        throw new Error("Method not implemented.");
+    sendResetPasswordToken(email: string, resetToken: string): Promise<IResponse> {
+        return this.emailService.sendEmail(email, 'Reset Token', resetToken)
     }
-    sendSignUpVerificationCode(email: String, code: String): Promise<IResponse> {
-        throw new Error("Method not implemented.");
+    sendSignUpVerificationCode(email: string, code: string): Promise<IResponse> {
+        return this.emailService.sendEmail(email, 'Verification Token', code)
     }
 }
 

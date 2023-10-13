@@ -17,6 +17,10 @@ import { OperationStatus } from "../../src/constants/operations";
 import { AuthGuard } from "../../src/middleware/AuthGuard";
 import { UserRoles } from "../../src/contracts/middleware/AuthGuard";
 import { Database } from "../../src/database/db";
+import { IEmailService } from '../../src/contracts/usecases/IEmailService'
+import { EmailService } from '../../src/usecases/email/EmailService'
+
+
 
 dotenv.config();
 
@@ -34,19 +38,20 @@ let notificationRepository: INotificationRepositories;
 let cloudStorageService: IStorageService;
 let cloudMessageService: ICloudMessagingService;
 let notificationService: INotificationService;
+let emailService: IEmailService
 
 beforeAll(async () => {
 
   //Connect db
   await db.connect()
 
-  db.getConnection().query('DELETE FROM user_groups WHERE device_id = 1000')
-  db.getConnection().query('DELETE FROM notifications WHERE user_id = 1000')
-  db.getConnection().query('DELETE FROM users WHERE id = 1000')
-  db.getConnection().query('DELETE FROM devices WHERE id = 1000')
+  // db.getConnection().query('DELETE FROM user_groups WHERE device_id = 1000')
+  // db.getConnection().query('DELETE FROM notifications WHERE user_id = 1000')
+  // db.getConnection().query('DELETE FROM users WHERE id = 1000')
+  // db.getConnection().query('DELETE FROM devices WHERE id = 1000')
 
   //create dummy data user, notification, devices, and user_groups with id 1000
-  db.getConnection().query("INSERT INTO users (id, username, email, password) VALUES (1000, 'iyan', 'iyan@mail.com', 'pass123')")
+  db.getConnection().query("INSERT INTO users (id, username, email, password, created_at) VALUES (1000, 'iyan', 'iyan@mail.com', 'pass123', '2023-09-09')")
   db.getConnection().query("INSERT INTO notifications (id, user_id, title, image, description, is_viewed, created_at, updated_at) VALUES " +
     `(1000,  1000, 'title 1', 'image 1', 'description 1', 0, '2023-09-09', '2023-09-09')`)
   db.getConnection().query("INSERT INTO devices (id, vendor_number, vendor_name) VALUES (1000, 'NUC 1001', 'INTEL')")
@@ -57,11 +62,13 @@ beforeAll(async () => {
   notificationRepository = new NotificationRepository();
   cloudStorageService = new StorageService();
   cloudMessageService = new CloudMessagingService();
+  emailService = new EmailService('smtp.gmail.com',587,'smartcubeppi@gmail.com','ispt ujxo avvo hpoz','smartcubeppi@gmail.com')
   notificationService = new NotificationService(
     userRepository,
     notificationRepository,
     cloudMessageService,
-    cloudStorageService
+    cloudStorageService,
+    emailService
   );
 });
 
@@ -84,12 +91,12 @@ const file: IUploadedFile = {
 let storedNotificationID = 0
 
 
-describe("store notificationss", () => {
+describe("store", () => {
 
   it("Store failed with user id invalid", async () => {
 
     //create auth guard
-    const authGuard = new AuthGuard(0, "", "", UserRoles.Admin); //User with id 0 is invalid or not exists
+    const authGuard = new AuthGuard(1000, "iyan@mai.com", "iyan", UserRoles.Admin); //User with id 0 is invalid or not exists
 
     //execute usecase
     const resp = await notificationService.storeNotification(
@@ -99,11 +106,11 @@ describe("store notificationss", () => {
       "wew1 desc"
     );
 
-    console.log(resp.getStatusCode())
+    // console.log(resp)
 
     //assert
     assert.equal(resp.getStatus(), false);
-    assert.equal(resp.getStatusCode(), OperationStatus.repoError);
+    assert.equal(OperationStatus.repoErrorModelNotFound, resp.getStatusCode());
 
   });
 
@@ -120,6 +127,7 @@ describe("store notificationss", () => {
       "wew1 desc"
     );
 
+    // console.log(res)
     //assert
     assert.ok(res.getStatus());
     assert.equal(res.getStatusCode(), OperationStatus.success);

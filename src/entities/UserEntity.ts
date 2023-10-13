@@ -47,7 +47,6 @@ UserEntity.init({
   modelName: 'User',
   tableName: 'users',
   underscored: true,
-  timestamps: false
 });
 
 UserEntity.hasMany(NotificationEntity)

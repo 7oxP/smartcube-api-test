@@ -7,6 +7,6 @@ export interface INotificationService {
     viewNotification(authGuard: IAuthGuard, id: number): Promise<IResponse>
     fetchAllNotification(authGuard: IAuthGuard,): Promise<IResponse>
     deleteNotification(authGuard: IAuthGuard, id: number): Promise<IResponse>
-    sendResetPasswordToken(email: String, resetToken: String): Promise<IResponse>
-    sendSignUpVerificationCode(email: String, code: String): Promise<IResponse>
+    sendResetPasswordToken(email: string, resetToken: string): Promise<IResponse>
+    sendSignUpVerificationCode(email: string, code: string): Promise<IResponse>
 }

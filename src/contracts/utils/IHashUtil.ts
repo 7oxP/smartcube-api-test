@@ -1,4 +1,7 @@
+import { IResponse } from "../usecases/IResponse"
+
 export interface IHashUtil {
-    hash(payload: String): String
-    compare(hashedPayload: String, payload: String): boolean
+  hash(payload: string): Promise<IResponse>
+  compare(payload: string, hashedPayload: string): Promise<IResponse>
 }
+
