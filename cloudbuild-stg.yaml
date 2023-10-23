@@ -18,6 +18,9 @@ steps:
       - 'DB_PASSWORD=${_DB_PASS}'
       - 'DB_DIALECT=${_DB_DIALECT}'
       - 'BUCKET_NAME=${_BUCKET_NAME}'
+      - 'JWT_SECRET_KEY=${_JWT_SECRET_KEY}'
+      - 'VERIFICATION_SECRET_KEY=${_VERIFICATION_SECRET_KEY}'
+      - 'RESET_TOKEN_SECRET_KEY=${_RESET_TOKEN_SECRET_KEY}'
   - name: gcr.io/cloud-builders/docker
     args:
       - build
