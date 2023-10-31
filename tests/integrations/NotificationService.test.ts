@@ -45,17 +45,21 @@ beforeAll(async () => {
   //Connect db
   await db.connect()
 
-  // db.getConnection().query('DELETE FROM user_groups WHERE device_id = 1000')
+  // db.getConnection().query('DELETE FROM user_groups WHERE edge_server_id = 1000')
   // db.getConnection().query('DELETE FROM notifications WHERE user_id = 1000')
   // db.getConnection().query('DELETE FROM users WHERE id = 1000')
   // db.getConnection().query('DELETE FROM devices WHERE id = 1000')
 
   //create dummy data user, notification, devices, and user_groups with id 1000
-  db.getConnection().query("INSERT INTO users (id, username, email, password, created_at) VALUES (1000, 'iyan', 'iyan@mail.com', 'pass123', '2023-09-09')")
-  db.getConnection().query("INSERT INTO notifications (id, user_id, title, image, description, is_viewed, created_at, updated_at) VALUES " +
-    `(1000,  1000, 'title 1', 'image 1', 'description 1', 0, '2023-09-09', '2023-09-09')`)
-  db.getConnection().query("INSERT INTO devices (id, vendor_number, vendor_name) VALUES (1000, 'NUC 1001', 'INTEL')")
-  db.getConnection().query("INSERT INTO user_groups (user_id, device_id, role_id) VALUES (1000, 1000, 1)")
+  try {
+    db.getConnection().query("INSERT INTO users (id, username, email, password, created_at) VALUES (1000, 'iyan', 'iyan@mail.com', 'pass123', '2023-09-09')")
+    db.getConnection().query("INSERT INTO notifications (id, user_id, title, image, description, is_viewed, created_at, updated_at) VALUES " +
+      `(1000,  1000, 'title 1', 'image 1', 'description 1', 0, '2023-09-09', '2023-09-09')`)
+    db.getConnection().query("INSERT INTO edge_servers (id, name, vendor, description, mqtt_user, mqtt_password) VALUES (1000, 'NUC 1001', 'INTEL', 'desc exmaple', 'user1', 'pass1')")
+    db.getConnection().query("INSERT INTO user_groups (user_id, edge_server_id, role_id) VALUES (1000, 1000, 1)")
+  } catch (error) {
+    throw error
+  }
 
   //Instantiate services
   userRepository = new UserRepository()
@@ -73,8 +77,8 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
-  db.getConnection().query('DELETE FROM user_groups WHERE device_id = 1000')
-  db.getConnection().query('DELETE FROM devices WHERE id = 1000')
+  db.getConnection().query('DELETE FROM user_groups WHERE edge_server_id = 1000')
+  db.getConnection().query('DELETE FROM edge_servers WHERE id = 1000')
   db.getConnection().query('DELETE FROM notifications WHERE user_id = 1000')
   db.getConnection().query('DELETE FROM users WHERE id = 1000')
 })
@@ -91,7 +95,7 @@ const file: IUploadedFile = {
 let storedNotificationID = 0
 
 
-describe("store", () => {
+describe("store s", () => {
 
   it("Store failed with user id invalid", async () => {
 
@@ -133,6 +137,7 @@ describe("store", () => {
     assert.equal(res.getStatusCode(), OperationStatus.success);
 
     storedNotificationID = res.getData().id
+
   });
 });
 
@@ -160,7 +165,7 @@ describe("view notification", () => {
 });
 
 describe("delete notification", () => {
-  const authGuard = new AuthGuard(1000, "", "", UserRoles.Admin);
+  const authGuard = new AuthGuard(1000, "iyan@gmail.com", "iyan", UserRoles.Admin);
 
   it("failed unauthorized", async () => {
     //create dummy data
@@ -190,7 +195,7 @@ describe("delete notification", () => {
       authGuard,
       storedNotificationID
     );
-    console.log(res.getMessage());
+    // console.log(res);
 
     //assert
     assert.ok(res.getStatus());

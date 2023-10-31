@@ -25,7 +25,7 @@ class NotificationRepository implements INotificationRepositories {
                 .setData(newNotif.dataValues)
 
         } catch (error: any) {
-
+            
             return new Response()
                 .setStatus(false)
                 .setStatusCode(OperationStatus.repoError)

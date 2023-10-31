@@ -19,12 +19,12 @@ export class AuthJWT {
     const decodedToken = await this.jwtUtil.decode(token!, this.secretKey);
 
     if(!token || !decodedToken.getStatus()){
-      return res.json(
+      return res.status(401).json(
       new Response()
       .setStatus(false)
       .setStatusCode(OperationStatus.repoError)
       .setMessage("Unauthorized")
-      .setData({})).status(401)
+      .setData({}))
     }
 
     (req as any).user = decodedToken

@@ -135,14 +135,14 @@ class UserRepository implements IUserRepository {
     }
   }
 
-  async fetchUserByGroup(userId: number, deviceId: number): Promise<IResponse> {
+  async fetchUserByGroup(userId: number, edgeServerId: number): Promise<IResponse> {
 
     try {
 
       const userGroupData = await UserGroupEntity.findOne({
         where: {
           user_id: userId,
-          device_id: deviceId,
+          edge_server_id: edgeServerId,
           role_id: UserRoles.Admin
         }
       })
@@ -151,9 +151,9 @@ class UserRepository implements IUserRepository {
         {
           include: {
             model: UserGroupEntity,
-            attributes: ['user_id', 'role_id', 'device_id'],
+            attributes: ['user_id', 'role_id', 'edge_server_id'],
             where: {
-              device_id: userGroupData?.dataValues.device_id
+              edge_server_id: userGroupData?.dataValues.edge_server_id
             }
           }
         }

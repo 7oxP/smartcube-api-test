@@ -1,8 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { db } from "./BaseEntity";
-import UserGroupEntity from "./UserGroup";
 
-class DeviceEntity extends Model {}
+class DeviceEntity extends Model { }
 
 DeviceEntity.init({
     id: {
@@ -14,19 +13,45 @@ DeviceEntity.init({
     vendor_name: {
         type: DataTypes.CHAR(255),
         allowNull: false,
-    },  
+    },
     vendor_number: {
         type: DataTypes.CHAR(255),
         allowNull: false,
-    }, 
+    },
+    type: {
+        type: DataTypes.STRING(32),
+        allowNull: false,
+    },
+    source_type: {
+        type: DataTypes.STRING(32),
+        allowNull: false,
+    },
+    dev_source_id: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    rtsp_source_address: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    assigned_model_type: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        allowNull: false,
+    },
+    assigned_model_index: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        allowNull: false,
+    },
+    additional_info: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    }
 }, {
-    sequelize: db.getConnection(), 
-    modelName: 'Device', 
+    sequelize: db.getConnection(),
+    modelName: 'Device',
     tableName: 'devices',
     timestamps: false,
     underscored: true
 })
-
-DeviceEntity.hasMany(UserGroupEntity, {foreignKey: 'device_id'})
 
 export default DeviceEntity

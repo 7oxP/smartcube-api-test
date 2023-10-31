@@ -38,9 +38,13 @@ const storeNotification = async function (
         storeResponse.setStatusCode(OperationStatus.repoError)
         return storeResponse
     }
-    
+ 
     //3. Fetch User Group to get the fcm registration token
     const usersGroup = await userRepo.fetchUserByGroup(authGuard.getUserId(), 1000)
+    if(usersGroup.isFailed()) {
+        return usersGroup
+    }
+
     const fcmRegistrationTokens = usersGroup.getData()?.map((user: UserEntity) => user.dataValues.fcm_registration_token)
 
     //4. broadcast notification to registered devices

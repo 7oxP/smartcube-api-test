@@ -4,6 +4,11 @@ import { db } from "./BaseEntity";
 class UserGroupEntity extends Model { }
 
 UserGroupEntity.init({
+  id: {
+    type: DataTypes.BIGINT.UNSIGNED,
+    primaryKey: true,
+    allowNull: false,
+  },
   user_id: {
     type: DataTypes.BIGINT.UNSIGNED,
     // allowNull: false,
@@ -16,11 +21,11 @@ UserGroupEntity.init({
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
   },
-  device_id: {
+  edge_server_id: {
     type: DataTypes.BIGINT.UNSIGNED,
     // allowNull: false,
     references: {
-      model: 'devices',
+      model: 'edge_servers',
       key: 'id'
     }
   },
