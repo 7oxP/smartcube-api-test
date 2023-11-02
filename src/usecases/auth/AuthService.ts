@@ -13,232 +13,242 @@ const dotenv = require("dotenv")
 dotenv.config()
 
 class AuthService implements IAuthService {
-  userRepo: IUserRepository
-  jwtUtil: IJWTUtil
-  hashUtil: IHashUtil
-  notificationService: INotificationService
-
-  constructor(
-    userRepo: IUserRepository,
-    jwtUtil: IJWTUtil,
-    hashUtil: IHashUtil,
+    userRepo: IUserRepository
+    jwtUtil: IJWTUtil
+    hashUtil: IHashUtil
     notificationService: INotificationService
-  ) {
-    this.userRepo = userRepo
-    this.jwtUtil = jwtUtil
-    this.hashUtil = hashUtil
-    this.notificationService = notificationService
-  }
 
-  async login(email: string, password: string): Promise<IResponse> {
-    const secretKey = process.env.JWT_SECRET_KEY || ""
-
-    try {
-      const userResponse = await this.userRepo.findByEmail(email)
-
-      if (!userResponse.getStatus()) {
-        userResponse.setStatusCode(OperationStatus.authInvalidCredential)
-        userResponse.setMessage("invalid credential")
-        userResponse.setData(undefined)
-        return userResponse
-      }
-
-      const compareResult = await this.hashUtil.compare(
-        password,
-        userResponse.getData().getDataValue("password")
-      )
-
-      if (!compareResult.getStatus()) {
-        compareResult.setStatusCode(OperationStatus.authInvalidCredential)
-        compareResult.setMessage("invalid credential")
-        compareResult.setData(undefined)
-        return compareResult
-      }
-
-      const accessTokenPayload = {
-        userId: userResponse.getData().getDataValue("id"),
-        email: userResponse.getData().getDataValue("email"),
-        username: userResponse.getData().getDataValue("username"),
-      }
-
-      const generatedToken = await this.jwtUtil.encode(accessTokenPayload, secretKey, "5m")
-
-      return new Response()
-        .setStatus(true)
-        .setStatusCode(OperationStatus.success)
-        .setMessage("ok")
-        .setData({ accessToken: generatedToken.getData() })
-
-    } catch (error: any) {
-      return new Response()
-        .setStatus(false)
-        .setStatusCode(OperationStatus.authServiceError)
-        .setMessage(error)
+    constructor(
+        userRepo: IUserRepository,
+        jwtUtil: IJWTUtil,
+        hashUtil: IHashUtil,
+        notificationService: INotificationService
+    ) {
+        this.userRepo = userRepo
+        this.jwtUtil = jwtUtil
+        this.hashUtil = hashUtil
+        this.notificationService = notificationService
     }
-  }
 
-  async signUp(
-    username: string,
-    email: string,
-    password: string,
-    cPassword: string
-  ): Promise<IResponse> {
-    try {
-      const userResponse = await this.userRepo.findByEmail(email)
-      if (userResponse.getStatus()) {
-        return new Response()
-          .setStatus(false)
-          .setStatusCode(OperationStatus.repoErrorModelExist)
-          .setMessage("email already exist")
-      }
+    async login(email: string, password: string): Promise<IResponse> {
+        const secretKey = process.env.JWT_SECRET_KEY || ""
 
-      if (password !== cPassword) {
-        return userResponse
-          .setStatus(false)
-          .setStatusCode(OperationStatus.signUpErrorInvalidData)
-          .setMessage("password is not the same")
-      }
+        try {
+            const userResponse = await this.userRepo.findByEmail(email)
 
-      const hashPassword = await this.hashUtil.hash(password)
+            if (!userResponse.getStatus()) {
+                userResponse.setStatusCode(
+                    OperationStatus.authInvalidCredential
+                )
+                userResponse.setMessage("invalid credential")
+                userResponse.setData(undefined)
+                return userResponse
+            }
 
-      const verificationCode = generateRandomString(6)
+            const compareResult = await this.hashUtil.compare(
+                password,
+                userResponse.getData().getDataValue("password")
+            )
 
-      const storeUserResponse = await this.userRepo.store(
-        username,
-        email,
-        hashPassword.data,
-        verificationCode
-      )
+            if (!compareResult.getStatus()) {
+                compareResult.setStatusCode(
+                    OperationStatus.authInvalidCredential
+                )
+                compareResult.setMessage("invalid credential")
+                compareResult.setData(undefined)
+                return compareResult
+            }
 
-      const sendVerificationCode = this.notificationService.sendSignUpVerificationCode(
-          "gxpgrwvup@internetkeno.com",
-          verificationCode
-        )
+            const accessTokenPayload = {
+                userId: userResponse.getData().getDataValue("id"),
+                email: userResponse.getData().getDataValue("email"),
+                username: userResponse.getData().getDataValue("username"),
+            }
 
-      return storeUserResponse
+            const generatedToken = await this.jwtUtil.encode(
+                accessTokenPayload,
+                secretKey,
+                "5m"
+            )
 
-    } catch (error: any) {
-      return new Response()
-        .setStatus(false)
-        .setStatusCode(OperationStatus.authServiceError)
-        .setMessage(error)
+            return new Response()
+                .setStatus(true)
+                .setStatusCode(OperationStatus.success)
+                .setMessage("ok")
+                .setData({ accessToken: generatedToken.getData() })
+        } catch (error: any) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.authServiceError)
+                .setMessage(error)
+        }
     }
-  }
 
-  async checkVerificationCode(
-    email: string,
-    verification_code: string
-  ): Promise<IResponse> {
-    try {
-      const userResponse = await this.userRepo.findByVerificationCode(
-        email,
-        verification_code
-      )
+    async signUp(
+        username: string,
+        email: string,
+        password: string,
+        cPassword: string
+    ): Promise<IResponse> {
+        try {
+            const userResponse = await this.userRepo.findByEmail(email)
+            if (userResponse.getStatus()) {
+                return new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.repoErrorModelExist)
+                    .setMessage("email already exist")
+            }
 
-      if (!userResponse.getStatus()) {
-        userResponse.setStatusCode(OperationStatus.verificationCodeInvalid)
-        userResponse.setMessage("invalid verification code!")
-        return userResponse
-      }
+            if (password !== cPassword) {
+                return userResponse
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.signUpErrorInvalidData)
+                    .setMessage("password is not the same")
+            }
 
-      const setVerifiedResponse = await this.userRepo.updateVerificationStatus(
-        email,
-        Boolean(1)
-      )
+            const hashPassword = await this.hashUtil.hash(password)
 
-      if (!setVerifiedResponse.getStatus()) {
-        return setVerifiedResponse
-      }
+            const verificationCode = generateRandomString(6)
 
-      return await this.userRepo.findByEmail(email)
+            const storeUserResponse = await this.userRepo.store(
+                username,
+                email,
+                hashPassword.data,
+                verificationCode
+            )
 
-    } catch (error: any) {
-      return new Response()
-        .setStatus(false)
-        .setStatusCode(OperationStatus.authServiceError)
-        .setMessage(error)
+            const sendVerificationCode =
+                this.notificationService.sendSignUpVerificationCode(
+                    "hqpntq@hldrive.com",
+                    verificationCode
+                )
+
+            return storeUserResponse
+        } catch (error: any) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.authServiceError)
+                .setMessage(error)
+        }
     }
-  }
 
-  async resetPasswordRequest(email: string): Promise<IResponse> {
-    try {
-      const user = await this.userRepo.findByEmail(email)
-      if (!user.getStatus()) {
-        user.setStatusCode(OperationStatus.authInvalidCredential)
-        user.setMessage("email does not exist!")
-        return user
-      }
+    async checkVerificationCode(
+        email: string,
+        verification_code: string
+    ): Promise<IResponse> {
+        try {
+            const userResponse = await this.userRepo.findByVerificationCode(
+                email,
+                verification_code
+            )
 
-      const resetToken = await this.jwtUtil.encode(
-        { email: email },
-        process.env.RESET_TOKEN_SECRET_KEY!,
-        "5m"
-      )
+            if (!userResponse.getStatus()) {
+                userResponse.setStatusCode(
+                    OperationStatus.verificationCodeInvalid
+                )
+                userResponse.setMessage("invalid verification code!")
+                return userResponse
+            }
 
-      const setToken = await this.userRepo.storeResetToken(
-        email,
-        resetToken.getData()
-      )
+            const setVerifiedResponse =
+                await this.userRepo.updateVerificationStatus(email, Boolean(1))
 
-      if (!setToken.getStatus()) {
-        return setToken
-          .setStatus(false)
-          .setStatusCode(OperationStatus.jwtGenerateError)
-          .setMessage("gagal update")
-      }
+            if (!setVerifiedResponse.getStatus()) {
+                return setVerifiedResponse
+            }
 
-      const resetPassResponse = this.notificationService.sendResetPasswordToken(
-        email,
-        resetToken.getData()
-      )
-
-      return resetPassResponse
-      
-    } catch (error) {
-      return new Response()
-        .setStatus(false)
-        .setStatusCode(OperationStatus.authServiceError)
-        .setMessage("error")
-        .setData({})
+            return await this.userRepo.findByEmail(email)
+        } catch (error: any) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.authServiceError)
+                .setMessage(error)
+        }
     }
-  }
 
-  async resetPassword(
-    resetToken: string,
-    password: string,
-    cPassword: string
-  ): Promise<IResponse> {
-    try {
-      if (password !== cPassword) {
-        return new Response()
-          .setStatus(false)
-          .setStatusCode(OperationStatus.authInvalidCredential)
-          .setMessage("password tidak sama!")
-      }
+    async resetPasswordRequest(email: string): Promise<IResponse> {
+        try {
+            const user = await this.userRepo.findByEmail(email)
+            if (!user.getStatus()) {
+                user.setStatusCode(OperationStatus.authInvalidCredential)
+                user.setMessage("email does not exist!")
+                return user
+            }
 
-      const decodedToken = await this.jwtUtil.decode(resetToken, process.env.RESET_TOKEN_SECRET_KEY!)
-      if(!decodedToken.getStatus()) {
-        decodedToken.setStatusCode(OperationStatus.authInvalidCredential)
-        decodedToken.setMessage("invalid token")
-        return decodedToken
-      }
+            const resetToken = await this.jwtUtil.encode(
+                { email: email },
+                process.env.RESET_TOKEN_SECRET_KEY!,
+                "5m"
+            )
 
-      const hashedPassword = await this.hashUtil.hash(password)
+            const setToken = await this.userRepo.storeResetToken(
+                email,
+                resetToken.getData()
+            )
 
-      const updatePassword = await this.userRepo.updatePassword(
-        hashedPassword.getData(),
-        resetToken
-      )
+            if (!setToken.getStatus()) {
+                return setToken
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.jwtGenerateError)
+                    .setMessage("gagal update")
+            }
 
-      return updatePassword
+            const resetPassResponse =
+                this.notificationService.sendResetPasswordToken(
+                    email,
+                    resetToken.getData()
+                )
 
-    } catch (error) {
-      return new Response()
-        .setStatus(false)
-        .setStatusCode(OperationStatus.repoError)
-        .setMessage("error")
+            return resetPassResponse
+        } catch (error) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.authServiceError)
+                .setMessage("error")
+                .setData({})
+        }
     }
-  }
+
+    async resetPassword(
+        resetToken: string,
+        password: string,
+        cPassword: string
+    ): Promise<IResponse> {
+        try {
+            if (password !== cPassword) {
+                return new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.authInvalidCredential)
+                    .setMessage("password tidak sama!")
+            }
+
+            const decodedToken = await this.jwtUtil.decode(
+                resetToken,
+                process.env.RESET_TOKEN_SECRET_KEY!
+            )
+            if (!decodedToken.getStatus()) {
+                decodedToken.setStatusCode(
+                    OperationStatus.authInvalidCredential
+                )
+                decodedToken.setMessage("invalid token")
+                return decodedToken
+            }
+
+            const hashedPassword = await this.hashUtil.hash(password)
+
+            const updatePassword = await this.userRepo.updatePassword(
+                hashedPassword.getData(),
+                resetToken
+            )
+
+            return updatePassword
+        } catch (error) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.repoError)
+                .setMessage("error")
+        }
+    }
 }
 
 export { AuthService }
