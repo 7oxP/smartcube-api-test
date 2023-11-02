@@ -4,112 +4,131 @@ import { Response } from "../utils/Response"
 import { OperationStatus } from "../constants/operations"
 
 export class AuthHandlers {
-  private authService: IAuthService
+    private authService: IAuthService
 
-  constructor(authService: IAuthService) {
-    this.authService = authService
-  }
-
-  async loginHandler(req: ExpressRequest, res: ExpressResponse) {
-    try {
-      const loginResponse = await this.authService.login(
-        req.body.email,
-        req.body.password
-      )
-      console.log(loginResponse)
-      return res.json(loginResponse).status(200)
-    } catch (error: any) {
-      return res
-        .json(
-          new Response()
-            .setStatus(false)
-            .setStatusCode(OperationStatus.fieldValidationError)
-            .setMessage(error)
-        )
-        .status(400)
+    constructor(authService: IAuthService) {
+        this.authService = authService
     }
-  }
 
-  async signUpHandler(req: ExpressRequest, res: ExpressResponse) {
-    try {
-      const signUpResponse = await this.authService.signUp(
-        req.body.username,
-        req.body.email,
-        req.body.password,
-        req.body.cPassword
-      )
-      console.log(signUpResponse)
-      return res.json(signUpResponse).status(200)
-    } catch (error: any) {
-      return res
-        .json(
-          new Response()
-            .setStatus(false)
-            .setStatusCode(OperationStatus.fieldValidationError)
-            .setMessage(error)
-        )
-        .status(400)
-    }
-  }
+    async loginHandler(req: ExpressRequest, res: ExpressResponse) {
+        try {
+            const loginResponse = await this.authService.login(
+                req.body.email,
+                req.body.password
+            )
 
-  async verificationHandler(req: ExpressRequest, res: ExpressResponse) {
-    try {
-      const verification = await this.authService.checkVerificationCode(
-        req.body.email,
-        req.body.verificationCode
-      )
-      console.log(verification)
-      return res.json(verification).status(200)
-    } catch (error: any) {
-      return res
-        .json(
-          new Response()
-            .setStatus(false)
-            .setStatusCode(OperationStatus.fieldValidationError)
-            .setMessage(error)
-        )
-        .status(400)
-    }
-  }
+            if (loginResponse.isFailed()) {
+                res.status(400)
+                return res.json(loginResponse)
+            }
 
-  async resetPasswordReq(req: ExpressRequest, res: ExpressResponse) {
-    try {
-      const resetRequest = await this.authService.resetPasswordRequest(
-        req.body.email
-      )
-      console.log(resetRequest)
-      return res.json(resetRequest).status(200)
-    } catch (error: any) {
-      return res
-        .json(
-          new Response()
-            .setStatus(false)
-            .setStatusCode(OperationStatus.fieldValidationError)
-            .setMessage(error)
-        )
-        .status(400)
+            res.status(200)
+            return res.json(loginResponse)
+        } catch (error: any) {
+            res.status(400)
+            return res.json(
+                new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.fieldValidationError)
+                    .setMessage(error)
+            )
+        }
     }
-  }
 
-  async resetPassword(req: ExpressRequest, res: ExpressResponse) {
-    try {
-      const reset = await this.authService.resetPassword(
-        req.header("Authorization")!,
-        req.body.password,
-        req.body.cPassword
-      )
-      console.log('reset',reset)
-      return res.json(reset).status(200)
-    } catch (error: any) {
-      return res
-        .json(
-          new Response()
-            .setStatus(false)
-            .setStatusCode(OperationStatus.fieldValidationError)
-            .setMessage(error)
-        )
-        .status(400)
+    async signUpHandler(req: ExpressRequest, res: ExpressResponse) {
+        try {
+            const signUpResponse = await this.authService.signUp(
+                req.body.username,
+                req.body.email,
+                req.body.password,
+                req.body.cPassword
+            )
+            console.log(signUpResponse.isFailed())
+
+            if (signUpResponse.isFailed()) {
+                res.status(400)
+                return res.json(signUpResponse)
+            }
+            res.status(200)
+            return res.json(signUpResponse)
+        } catch (error: any) {
+            res.status(400)
+            return res.json(
+                new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.fieldValidationError)
+                    .setMessage(error)
+            )
+        }
     }
-  }
+
+    async verificationHandler(req: ExpressRequest, res: ExpressResponse) {
+        try {
+            const verification = await this.authService.checkVerificationCode(
+                req.body.email,
+                req.body.verificationCode
+            )
+            if (verification.isFailed()) {
+                res.status(400)
+                return res.json(verification)
+            }
+            res.status(200)
+            return res.json(verification)
+        } catch (error: any) {
+            res.status(400)
+            return res.json(
+                new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.fieldValidationError)
+                    .setMessage(error)
+            )
+        }
+    }
+
+    async resetPasswordReq(req: ExpressRequest, res: ExpressResponse) {
+        try {
+            const resetRequest = await this.authService.resetPasswordRequest(
+                req.body.email
+            )
+            if (resetRequest.isFailed()) {
+                res.status(400)
+                return res.json(resetRequest)
+            }
+            res.status(200)
+            return res.json(resetRequest)
+        } catch (error: any) {
+            res.status(400)
+            return res.json(
+                new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.fieldValidationError)
+                    .setMessage(error)
+            )
+        }
+    }
+
+    async resetPassword(req: ExpressRequest, res: ExpressResponse) {
+        try {
+            const reset = await this.authService.resetPassword(
+                req.header("Authorization")!,
+                req.body.password,
+                req.body.cPassword
+            )
+            if (reset.isFailed()) {
+                res.status(400)
+                return res.json(reset)
+            }
+            res.status(200)
+            return res.json(reset)
+        } catch (error: any) {
+            res.status(400)
+            return res.json(
+                new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.fieldValidationError)
+                    .setMessage(error)
+            )
+        }
+    }
 }
 
