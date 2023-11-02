@@ -59,7 +59,6 @@ class AuthService implements IAuthService {
         userId: userResponse.getData().getDataValue("id"),
         email: userResponse.getData().getDataValue("email"),
         username: userResponse.getData().getDataValue("username"),
-        password: userResponse.getData().getDataValue("password"),
       }
 
       const generatedToken = await this.jwtUtil.encode(accessTokenPayload, secretKey, "5m")
