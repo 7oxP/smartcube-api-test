@@ -23,6 +23,7 @@ class UserRepository implements IUserRepository {
           .setData(undefined)
       }
 
+      user?.setDataValue('password', null)
       return new Response()
         .setStatus(true)
         .setStatusCode(OperationStatus.success)

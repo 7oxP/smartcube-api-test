@@ -119,7 +119,7 @@ class AuthService implements IAuthService {
 
             const sendVerificationCode =
                 this.notificationService.sendSignUpVerificationCode(
-                    "hqpntq@hldrive.com",
+                    email,
                     verificationCode
                 )
 
