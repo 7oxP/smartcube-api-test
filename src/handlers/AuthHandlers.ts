@@ -43,7 +43,6 @@ export class AuthHandlers {
                 req.body.password,
                 req.body.cPassword
             )
-            console.log(signUpResponse.isFailed())
 
             if (signUpResponse.isFailed()) {
                 res.status(400)

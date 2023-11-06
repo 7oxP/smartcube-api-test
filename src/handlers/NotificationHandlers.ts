@@ -60,7 +60,7 @@ class NotificationHandlers {
 
 
             //2. build authGuard
-            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin)
+            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getEdgeServerId)
 
             //3. parsing file multipart/form-data
 
@@ -101,7 +101,7 @@ class NotificationHandlers {
             const userData = (req as any).user
             // console.log('user data:',userData.getData().userId)
             //2. build authGuard
-            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin)
+            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getEdgeServerId)
             console.log(authGuard)
             const fetchResponse = await this.notificationService.fetchAllNotification(authGuard)
             
@@ -142,7 +142,7 @@ class NotificationHandlers {
         const userData = (req as any).user
 
         //2. build authGuard
-        const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin)
+        const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getEdgeServerId)
 
         //3. execute
         const viewResponse = await this.notificationService.viewNotification(authGuard, notifId)
@@ -177,7 +177,7 @@ class NotificationHandlers {
         const userData = (req as any).user
 
         //2. build authGuard
-        const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin)
+        const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getEdgeServerId)
 
         //3. execute
         const deleteResponse = await this.notificationService.deleteNotification(authGuard, notifId)

@@ -40,8 +40,6 @@ class AuthService implements IAuthService {
                 userResponse.setStatusCode(
                     OperationStatus.authInvalidCredential
                 )
-                userResponse.setMessage("invalid credential")
-                userResponse.setData(undefined)
                 return userResponse
             }
 
@@ -57,6 +55,16 @@ class AuthService implements IAuthService {
                 compareResult.setMessage("invalid credential")
                 compareResult.setData(undefined)
                 return compareResult
+            }
+
+            if (!userResponse.getData().getDataValue("is_verified")) {
+                userResponse.setStatus(false)
+                userResponse.setStatusCode(
+                    OperationStatus.authUnverified
+                )
+                userResponse.setMessage("User is unverified")
+                userResponse.setData(undefined)
+                return userResponse
             }
 
             const accessTokenPayload = {
@@ -122,7 +130,6 @@ class AuthService implements IAuthService {
                     email,
                     verificationCode
                 )
-
             return storeUserResponse
         } catch (error: any) {
             return new Response()
@@ -157,7 +164,7 @@ class AuthService implements IAuthService {
                 return setVerifiedResponse
             }
 
-            return await this.userRepo.findByEmail(email)
+            return await this.userRepo.findByEmailNoPassword(email)
         } catch (error: any) {
             return new Response()
                 .setStatus(false)

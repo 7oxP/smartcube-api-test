@@ -100,7 +100,7 @@ describe("store s", () => {
   it("Store failed with user id invalid", async () => {
 
     //create auth guard
-    const authGuard = new AuthGuard(1000, "iyan@mai.com", "iyan", UserRoles.Admin); //User with id 0 is invalid or not exists
+    const authGuard = new AuthGuard(1000, "iyan@mai.com", "iyan", UserRoles.Admin, 20); //User with id 0 is invalid or not exists
 
     //execute usecase
     const resp = await notificationService.storeNotification(
@@ -121,7 +121,7 @@ describe("store s", () => {
   it("Store success", async () => {
 
     //create auth guard
-    const authGuard = new AuthGuard(1000, "iyan@mail.com", "iyan", UserRoles.Admin);
+    const authGuard = new AuthGuard(1000, "iyan@mail.com", "iyan", UserRoles.Admin, 20);
 
     //execute usecase
     const res = await notificationService.storeNotification(
@@ -144,7 +144,7 @@ describe("store s", () => {
 describe("view notification", () => {
 
   it("success", async () => {
-    const authGuard = new AuthGuard(1000, "", "", UserRoles.Admin);
+    const authGuard = new AuthGuard(1000, "", "", UserRoles.Admin, 20);
 
     const res = await notificationService.viewNotification(authGuard, storedNotificationID);
     // console.log(res.getMessage());
@@ -154,7 +154,7 @@ describe("view notification", () => {
   });
 
   it("failed unauthorized", async () => {
-    const authGuard = new AuthGuard(0, "", "", UserRoles.Admin);
+    const authGuard = new AuthGuard(0, "", "", UserRoles.Admin, 20);
 
     const res = await notificationService.viewNotification(authGuard, storedNotificationID);
     // console.log(res.getMessage());
@@ -165,7 +165,7 @@ describe("view notification", () => {
 });
 
 describe("delete notification", () => {
-  const authGuard = new AuthGuard(1000, "iyan@gmail.com", "iyan", UserRoles.Admin);
+  const authGuard = new AuthGuard(1000, "iyan@gmail.com", "iyan", UserRoles.Admin, 20);
 
   it("failed unauthorized", async () => {
     //create dummy data
@@ -177,7 +177,7 @@ describe("delete notification", () => {
     // );
 
     //delete notif
-    const authGuard2 = new AuthGuard(999999, "", "", UserRoles.Admin);
+    const authGuard2 = new AuthGuard(999999, "", "", UserRoles.Admin, 20);
     const res = await notificationService.deleteNotification(
       authGuard2,
       storedNotificationID

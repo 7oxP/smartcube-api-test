@@ -12,7 +12,7 @@ class UserRepository implements IUserRepository {
   date = new Date()
   formattedTime = format(this.date, 'yyyy-MM-dd HH:mm:ss')
 
-  async findByEmail(email: String): Promise<IResponse> {
+  async findByEmail(email: string): Promise<IResponse> {
     try {
       const user = await UserEntity.findOne({ where: { email: email } })
       if (user == null) {
@@ -23,7 +23,6 @@ class UserRepository implements IUserRepository {
           .setData(undefined)
       }
 
-      user?.setDataValue('password', null)
       return new Response()
         .setStatus(true)
         .setStatusCode(OperationStatus.success)
@@ -31,7 +30,33 @@ class UserRepository implements IUserRepository {
         .setData(user)
 
     } catch (error: any) {
-      console.log(error)
+      return new Response()
+        .setStatus(false)
+        .setStatusCode(OperationStatus.repoError)
+        .setMessage(error)
+        .setData({})
+    }
+  }
+
+  async findByEmailNoPassword(email: string): Promise<IResponse> {
+    try {
+      const user = await UserEntity.findOne({ where: { email: email } })
+      if (user == null) {
+        return new Response()
+          .setStatus(false)
+          .setStatusCode(OperationStatus.repoErrorModelNotFound)
+          .setMessage("User not found")
+          .setData(undefined)
+      }
+      user?.setDataValue("password", null)
+
+      return new Response()
+        .setStatus(true)
+        .setStatusCode(OperationStatus.success)
+        .setMessage("ok")
+        .setData(user)
+
+    } catch (error: any) {
       return new Response()
         .setStatus(false)
         .setStatusCode(OperationStatus.repoError)

@@ -8,6 +8,7 @@ interface IAuthGuard {
     getUserEmail(): string,
     getUsername(): string,
     getUserRole(): UserRoles
+    getEdgeServerId(): number
 }
 
 export {IAuthGuard, UserRoles}
