@@ -76,7 +76,7 @@ class AuthService implements IAuthService {
             const generatedToken = await this.jwtUtil.encode(
                 accessTokenPayload,
                 secretKey,
-                "5m"
+                "168h"
             )
 
             return new Response()
