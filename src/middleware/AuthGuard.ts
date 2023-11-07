@@ -5,14 +5,14 @@ export class AuthGuard implements IAuthGuard {
     private userEmail?: string
     private username?: string
     private userRole?: UserRoles
-    private edgeServerId?: number
+    private edgeServerId: number
 
     constructor(
         userId: number,
         userEmail: string,
         username: string,
         userRole: UserRoles,
-        edgeServerId: number
+        edgeServerId: number = 0
     ) {
         this.userId = userId
         this.userEmail = userEmail
