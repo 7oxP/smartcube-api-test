@@ -40,7 +40,7 @@ const storeNotification = async function (
     }
  
     //3. Fetch User Group to get the fcm registration token
-    const usersGroup = await userRepo.fetchUserByGroup(authGuard.getUserId(), 1000)
+    const usersGroup = await userRepo.fetchUserByGroup(authGuard.getUserId(), authGuard.getEdgeServerId())
     if(usersGroup.isFailed()) {
         return usersGroup
     }

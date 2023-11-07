@@ -16,6 +16,7 @@ export const OperationStatus = {
     //auth
     authInvalidCredential: -8,
     authServiceError: -9,
+    authUnverified: -14,
 
     //signUp
     signUpErrorInvalidData: -11,

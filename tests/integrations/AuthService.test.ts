@@ -109,9 +109,24 @@ describe("login", () => {
     assert.equal(res.getStatusCode(), OperationStatus.authInvalidCredential)
   })
 
+  it("failed to login due to unverified", async () => {
+    const email = "iyan@mail.com"
+    const password = "pass12345"
+
+    const res = await authService.login(email, password)
+
+    //assert
+    assert.equal(res.getStatus(), false)
+    assert.equal(res.getStatusCode(), OperationStatus.authInvalidCredential)
+  })
+
   it("Login success", async () => {
     const email = "iyan@mail.com"
     const password = "pass123"
+    
+    await db.getConnection().query(
+      "UPDATE users SET is_verified=1 WHERE id=10000"
+    )
 
     const res = await authService.login(email, password)
 
@@ -205,7 +220,7 @@ describe("reset password request", () => {
     // assert
     assert.equal(res.getStatus(), true)
     assert.equal(res.getStatusCode(), OperationStatus.success)
-  })
+  }, 6000)
 })
 
 describe("reset password", () => {

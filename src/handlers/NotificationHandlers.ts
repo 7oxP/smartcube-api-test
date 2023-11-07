@@ -28,6 +28,7 @@ class NotificationHandlers {
 
             for (const validation of result) {
                 if (!validation.isEmpty()) {
+                    res.status(400)
                     return res.json((new Response())
                         .setStatus(false)
                         .setStatusCode(OperationStatus.fieldValidationError)
@@ -38,6 +39,7 @@ class NotificationHandlers {
 
             //temporary validate image files
             if (req.files == null && req.files == undefined) {
+                res.status(400)
                 return res.json((new Response())
                     .setStatus(false)
                     .setStatusCode(OperationStatus.fieldValidationError)
@@ -48,6 +50,7 @@ class NotificationHandlers {
             const file = req.files!.image as UploadedFile
 
             if (!(['image/png', 'image/jpg', 'image/jpeg'].includes(file.mimetype))) {
+                res.status(400)
                 return res.json((new Response())
                     .setStatus(false)
                     .setStatusCode(OperationStatus.fieldValidationError)
@@ -60,7 +63,7 @@ class NotificationHandlers {
 
 
             //2. build authGuard
-            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin)
+            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getData().edgeServerId)
 
             //3. parsing file multipart/form-data
 
@@ -78,12 +81,14 @@ class NotificationHandlers {
                 req.body.description)
 
             if (notifResponse.isFailed()) {
-                return res.json(notifResponse).status(400)
+                res.status(400)
+                return res.json(notifResponse)
             }
 
             return res.json(notifResponse).status(200)
 
         } catch (error: any) {
+            res.status(400)
             return res.json((new Response())
                 .setStatus(false)
                 .setStatusCode(OperationStatus.fieldValidationError)
@@ -101,18 +106,19 @@ class NotificationHandlers {
             const userData = (req as any).user
             // console.log('user data:',userData.getData().userId)
             //2. build authGuard
-            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin)
-            console.log(authGuard)
+            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getData().edgeServerId)
+
             const fetchResponse = await this.notificationService.fetchAllNotification(authGuard)
             
             //3. execute
             if (fetchResponse.isFailed()) {
-                return res.json(fetchResponse).status(400)
+                res.status(400)
+                return res.json(fetchResponse)
             }
     
             return res.json(fetchResponse).status(200)
         } catch (error:any) {
-            console.log(error)
+            res.status(400)
             return res.json({error: error})
         }
 
@@ -128,6 +134,7 @@ class NotificationHandlers {
 
         for (const validation of result) {
             if (!validation.isEmpty()) {
+                res.status(400)
                 return res.json((new Response())
                     .setStatus(false)
                     .setStatusCode(OperationStatus.fieldValidationError)
@@ -142,7 +149,7 @@ class NotificationHandlers {
         const userData = (req as any).user
 
         //2. build authGuard
-        const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin)
+        const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getData().edgeServerId)
 
         //3. execute
         const viewResponse = await this.notificationService.viewNotification(authGuard, notifId)
@@ -163,6 +170,7 @@ class NotificationHandlers {
 
         for (const validation of result) {
             if (!validation.isEmpty()) {
+                res.status(400)
                 return res.json((new Response())
                     .setStatus(false)
                     .setStatusCode(OperationStatus.fieldValidationError)
@@ -177,7 +185,7 @@ class NotificationHandlers {
         const userData = (req as any).user
 
         //2. build authGuard
-        const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin)
+        const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getData().edgeServerId)
 
         //3. execute
         const deleteResponse = await this.notificationService.deleteNotification(authGuard, notifId)

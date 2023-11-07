@@ -1,22 +1,24 @@
-import { IAuthGuard, UserRoles } from "@/contracts/middleware/AuthGuard";
+import { IAuthGuard, UserRoles } from "@/contracts/middleware/AuthGuard"
 
 export class AuthGuard implements IAuthGuard {
-
     private userId?: number
     private userEmail?: string
     private username?: string
     private userRole?: UserRoles
+    private edgeServerId: number
 
     constructor(
         userId: number,
         userEmail: string,
         username: string,
-        userRole: UserRoles
+        userRole: UserRoles,
+        edgeServerId: number = 0
     ) {
         this.userId = userId
         this.userEmail = userEmail
         this.username = username
         this.userRole = userRole
+        this.edgeServerId = edgeServerId
     }
 
     getUserId(): number {
@@ -35,5 +37,8 @@ export class AuthGuard implements IAuthGuard {
         return this.userRole!
     }
 
-    
+    getEdgeServerId(): number {
+        return this.edgeServerId!
+    }
 }
+
