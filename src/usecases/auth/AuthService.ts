@@ -76,7 +76,7 @@ class AuthService implements IAuthService {
             const generatedToken = await this.jwtUtil.encode(
                 accessTokenPayload,
                 secretKey,
-                "5m"
+                "168h"
             )
 
             return new Response()
@@ -199,11 +199,14 @@ class AuthService implements IAuthService {
                     .setStatusCode(OperationStatus.jwtGenerateError)
                     .setMessage("gagal update")
             }
+            const resetPassURL = process.env.RESET_PASSWORD_URL+resetToken.getData()
+            const resetPassMessage = "Silakan klik link berikut untuk mengatur ulang password Anda:<br>"+
+            resetPassURL
 
             const resetPassResponse =
                 this.notificationService.sendResetPasswordToken(
                     email,
-                    resetToken.getData()
+                    resetPassMessage
                 )
 
             return resetPassResponse
