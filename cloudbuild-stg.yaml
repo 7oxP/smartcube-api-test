@@ -21,7 +21,7 @@ steps:
       - 'JWT_SECRET_KEY=${_JWT_SECRET_KEY}'
       - 'VERIFICATION_SECRET_KEY=${_VERIFICATION_SECRET_KEY}'
       - 'RESET_TOKEN_SECRET_KEY=${_RESET_TOKEN_SECRET_KEY}'
-      - 'RESET_PASSWORD_URL'=${_RESET_PASSWORD_URL}
+      - 'RESET_PASSWORD_URL=${_RESET_PASSWORD_URL}'
   - name: gcr.io/cloud-builders/docker
     args:
       - build
