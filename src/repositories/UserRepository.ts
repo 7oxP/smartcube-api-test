@@ -254,7 +254,7 @@ class UserRepository implements IUserRepository {
         .setStatus(true)
         .setStatusCode(OperationStatus.success)
         .setMessage("ok")
-        .setData(updateUser)
+        .setData(true)
 
     } catch (error: any) {
       return new Response()
