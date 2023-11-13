@@ -109,20 +109,22 @@ class UserRepository implements IUserRepository {
         where: { email: email, verification_code: code },
       })
 
-      if (user !== null) {
-        user.setDataValue('password', null)
+      if (user == null) {
         return new Response()
-          .setStatus(true)
-          .setStatusCode(OperationStatus.success)
-          .setMessage("ok")
-          .setData(user)
+          .setStatus(false)
+          .setStatusCode(OperationStatus.repoErrorModelNotFound)
+          .setMessage("User not found")
+          .setData(null)
       }
 
+      user.setDataValue('password', null)
       return new Response()
-        .setStatus(false)
-        .setStatusCode(OperationStatus.repoErrorModelNotFound)
-        .setMessage("User not found")
-        .setData({})
+        .setStatus(true)
+        .setStatusCode(OperationStatus.success)
+        .setMessage("ok")
+        .setData(user)
+
+
     } catch (error: any) {
       return new Response()
         .setStatus(false)

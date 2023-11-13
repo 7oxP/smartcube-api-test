@@ -24,4 +24,14 @@ export const OperationStatus = {
 
     //jwt
     jwtGenerateError: -13,
+
+    //edge server
+    addDeviceError: -18,
+
+    //mqtt
+    mqttPublishError: -19,
+    mqttSubscribeError: -20,
+
+    //notification
+    invalidEdgeToken: -122,
 }

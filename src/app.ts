@@ -1,5 +1,3 @@
-import dotenv from 'dotenv'
-
 import { NotificationRepository } from './repositories/NotificationRepository'
 import { StorageService } from './usecases/storage/StorageService'
 import { CloudMessagingService } from './usecases/cloudMessage/CloudMessagingService'
@@ -10,23 +8,48 @@ import { JWTUtil } from './utils/JWTUtil'
 import { UserRepository } from './repositories/UserRepository'
 import { HashUtil } from './utils/HashUtil'
 import { EmailService } from './usecases/email/EmailService'
-import { AuthJWT } from './middleware/AuthJWT'
+import { MQTTService } from './usecases/mqtt/MQTTService'
+import { EdgeServerService } from './usecases/edgeServer/EdgeServerService'
+import { EdgeServerRepository } from './repositories/EdgeServerRepository'
 
-function main() {
+async function main() {
 
-    const userRepository = new UserRepository()
-    const notificationRepository = new NotificationRepository()
-    const cloudStorageService = new StorageService()
-    const cloudMessageService = new CloudMessagingService()
-    const emailService = new EmailService(process.env.SMTP_HOST!,Number(process.env.SMTP_PORT!),process.env.SMTP_USER!,process.env.SMTP_USER_PASSWORD!,process.env.SENDER_EMAIL!)
-    const notificationService = new NotificationService(userRepository, notificationRepository, cloudMessageService, cloudStorageService, emailService)
+    //Instantiate utilities
     const jwtUtil = new JWTUtil()
     const hashUtil = new HashUtil()
+
+    //Instantiate Repositories
+    const userRepository = new UserRepository()
+    const notificationRepository = new NotificationRepository()
+    const edgeServerRepository = new EdgeServerRepository()
+
+    //Instantiate External Services
+    const cloudStorageService = new StorageService()
+    const cloudMessageService = new CloudMessagingService()
+    const emailService = new EmailService(
+        process.env.SMTP_HOST!,
+        Number(process.env.SMTP_PORT!),
+        process.env.SMTP_USER!,
+        process.env.SMTP_USER_PASSWORD!,
+        process.env.SENDER_EMAIL!
+    )
+    const mqttService = new MQTTService(
+        process.env.MQTT_PROTOCOL!,
+        process.env.MQTT_HOST!,
+        process.env.MQTT_PORT!,
+        process.env.MQTT_CA_CERT!,
+        process.env.MQTT_USERNAME!,
+        process.env.MQTT_PASSWORD!,
+    )
+    await mqttService.connect()
+
+    //Internal Services (Usecases)
+    const notificationService = new NotificationService(userRepository, notificationRepository, cloudMessageService, cloudStorageService, emailService)
     const authService = new AuthService(userRepository, jwtUtil, hashUtil, notificationService)
+    const edgeServerService = new EdgeServerService(jwtUtil, edgeServerRepository, mqttService)
 
-
-    runHttpHandlers(notificationService, authService, jwtUtil)
-
+    //Http Handlers
+    runHttpHandlers(notificationService, authService, edgeServerService, jwtUtil)
 }
 
 main()

@@ -15,44 +15,49 @@ const storeNotification = async function (
     userRepo: IUserRepository,
     cloudMessageService: ICloudMessagingService,
     cloudStorageService: IStorageService,
-    file: IUploadedFile, 
-    title: string, 
+    file: IUploadedFile,
+    title: string,
     description: string
 ): Promise<IResponse> {
 
     const userResponse = await userRepo.findByEmail(authGuard.getUserEmail())
-    if(!userResponse.getStatus()) {
+    if (userResponse.isFailed()) {
         return userResponse
     }
 
+    //3. Fetch User Group to get the fcm registration token
+    const usersGroupResp = await userRepo.fetchUserByGroup(authGuard.getUserId(), authGuard.getEdgeServerId())
+    if (usersGroupResp.isFailed()) {
+        if(authGuard.getEdgeServerId() == 0 || authGuard.getEdgeServerId() == undefined) {
+            usersGroupResp.setMessage("it seems you're trying to store notification using user token")
+            usersGroupResp.setStatusCode(OperationStatus.invalidEdgeToken)
+            return usersGroupResp
+        }
+        return usersGroupResp
+    }
+
+    const fcmRegistrationTokens = usersGroupResp.getData()?.map((user: UserEntity) => user.dataValues.fcm_registration_token)
+
     //1. upload file to cloud storage    
     let uploadResponse = await cloudStorageService.uploadFile(file)
-    if(uploadResponse.isFailed()) {
+    if (uploadResponse.isFailed()) {
         uploadResponse.setStatusCode(OperationStatus.cloudStorageError)
         return uploadResponse
     }
 
     //2. save data to repo
     let storeResponse = await notifRepo.storeNotification(authGuard.getUserId(), title, description, uploadResponse.getData().fileUrl)
-    if(storeResponse.isFailed()) {
+    if (storeResponse.isFailed()) {
         storeResponse.setStatusCode(OperationStatus.repoError)
         return storeResponse
     }
- 
-    //3. Fetch User Group to get the fcm registration token
-    const usersGroup = await userRepo.fetchUserByGroup(authGuard.getUserId(), authGuard.getEdgeServerId())
-    if(usersGroup.isFailed()) {
-        return usersGroup
-    }
-
-    const fcmRegistrationTokens = usersGroup.getData()?.map((user: UserEntity) => user.dataValues.fcm_registration_token)
 
     //4. broadcast notification to registered devices
     cloudMessageService.sendNotification(fcmRegistrationTokens, title, description, uploadResponse.getData().fileUrl)
 
     return new Response()
         .setStatus(true)
-        .setStatusCode(1)
+        .setStatusCode(OperationStatus.success)
         .setMessage("ok")
         .setData(storeResponse.getData())
 }

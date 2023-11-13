@@ -26,7 +26,7 @@ UserEntity.init({
     allowNull: false
   },
   reset_token: {
-    type: DataTypes.STRING(12),
+    type: DataTypes.TEXT,
     allowNull: true
   },
   is_verified: {
