@@ -65,7 +65,7 @@ class EdgeServerService implements IEdgeServerService {
             edgeServerId: res.getData().id
         }
 
-        const edgeAccessTokenRes = await this.jwtUtil.encode(edgeAccessTokenPayload, process.env.JWT_SECRET_KEY!, "0")
+        const edgeAccessTokenRes = await this.jwtUtil.encode(edgeAccessTokenPayload, process.env.JWT_SECRET_KEY!, "168h")
         if (edgeAccessTokenRes.isFailed()) return edgeAccessTokenRes
 
         return new Response()

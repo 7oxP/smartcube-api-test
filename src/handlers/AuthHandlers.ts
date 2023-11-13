@@ -109,7 +109,7 @@ export class AuthHandlers {
     async resetPassword(req: ExpressRequest, res: ExpressResponse) {
         try {
             const reset = await this.authService.resetPassword(
-                req.header("Authorization")!,
+                req.header("Authorization")!.split(" ")[1],
                 req.body.password,
                 req.body.cPassword
             )

@@ -1,10 +1,10 @@
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express'
 import { checkSchema } from 'express-validator'
 import { Response } from "../utils/Response"
-import { OperationStatus } from '@/constants/operations'
-import { AuthGuard } from '@/middleware/AuthGuard'
+import { OperationStatus } from '../constants/operations'
+import { AuthGuard } from '../middleware/AuthGuard'
 import { IEdgeServerService } from '@/contracts/usecases/IEdgeServerService'
-import { UserRoles } from '@/contracts/middleware/AuthGuard'
+import { UserRoles } from '../contracts/middleware/AuthGuard'
 
 export class EdgeServerHandlers {
 
@@ -23,7 +23,7 @@ export class EdgeServerHandlers {
             const result = await checkSchema({
                 name: { notEmpty: true, },
                 vendor: { notEmpty: true, },
-                description: { notEmpty: true, }
+                description: {}
             }).run(req);
 
             for (const validation of result) {
@@ -77,11 +77,11 @@ export class EdgeServerHandlers {
                 vendor_number: { notEmpty: true, },
                 type: { notEmpty: true, },
                 source_type: { notEmpty: true, },
-                dev_source_id: { notEmpty: true, },
-                rtsp_source_address: { notEmpty: true, },
+                dev_source_id: {},
+                rtsp_source_address: {},
                 assigned_model_type: { notEmpty: true, },
                 assigned_model_index: { notEmpty: true, },
-                additional_info: { notEmpty: true, },
+                additional_info: {},
             }).run(req);
 
             for (const validation of result) {

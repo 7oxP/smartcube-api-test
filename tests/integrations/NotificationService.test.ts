@@ -124,6 +124,28 @@ describe("store", () => {
 
   });
 
+  it("Store failed with invalid edge token", async () => {
+
+    //create auth guard
+    const authGuard = new AuthGuard(10003, "iyan@mail.com", "iyan", UserRoles.Admin, undefined); //User with id 0 is invalid or not exists
+
+    //execute usecase
+    const resp = await notificationService.storeNotification(
+      authGuard,
+      file,
+      "wew1",
+      "wew1 desc"
+    );
+
+    console.log(resp)
+
+    //assert
+    assert.equal(resp.getStatus(), false);
+    assert.equal(OperationStatus.invalidEdgeToken, resp.getStatusCode());
+
+  });
+
+
   it("Store success", async () => {
 
     //create auth guard

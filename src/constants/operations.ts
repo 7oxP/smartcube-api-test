@@ -31,4 +31,7 @@ export const OperationStatus = {
     //mqtt
     mqttPublishError: -19,
     mqttSubscribeError: -20,
+
+    //notification
+    invalidEdgeToken: -122,
 }

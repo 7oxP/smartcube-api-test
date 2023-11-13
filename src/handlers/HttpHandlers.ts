@@ -48,7 +48,7 @@ export function runHttpHandlers(
     app.post('/reset-password', jwtMiddlewareResetReq.authenticateToken, async (req:Request, res: Response) => authHandler.resetPassword(req, res))
     
     //Edge Server
-    app.post('/edge-server', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.addEdgeDevice(req, res))
+    app.post('/edge-server', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.addEdgeServer(req, res))
     app.post('/edge-device', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.addEdgeDevice(req, res))
     app.get('/edge-server', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.fetchEdgeServers(req, res))
     app.get('/edge-device/:edge_server_id', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.fetchEdgeDevices(req, res))

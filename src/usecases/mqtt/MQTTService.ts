@@ -62,8 +62,8 @@ export class MQTTService implements IMQTTService {
     async publish(topic: string, payload: any): Promise<IResponse> {
 
         try {
-
-            this.client.publish(topic, payload);
+            
+            this.client.publish(topic, payload.toString());
 
             return new Response()
                 .setStatus(true)

@@ -25,6 +25,19 @@ const storeNotification = async function (
         return userResponse
     }
 
+    //3. Fetch User Group to get the fcm registration token
+    const usersGroupResp = await userRepo.fetchUserByGroup(authGuard.getUserId(), authGuard.getEdgeServerId())
+    if (usersGroupResp.isFailed()) {
+        if(authGuard.getEdgeServerId() == 0 || authGuard.getEdgeServerId() == undefined) {
+            usersGroupResp.setMessage("it seems you're trying to store notification using user token")
+            usersGroupResp.setStatusCode(OperationStatus.invalidEdgeToken)
+            return usersGroupResp
+        }
+        return usersGroupResp
+    }
+
+    const fcmRegistrationTokens = usersGroupResp.getData()?.map((user: UserEntity) => user.dataValues.fcm_registration_token)
+
     //1. upload file to cloud storage    
     let uploadResponse = await cloudStorageService.uploadFile(file)
     if (uploadResponse.isFailed()) {
@@ -38,14 +51,6 @@ const storeNotification = async function (
         storeResponse.setStatusCode(OperationStatus.repoError)
         return storeResponse
     }
-
-    //3. Fetch User Group to get the fcm registration token
-    const usersGroup = await userRepo.fetchUserByGroup(authGuard.getUserId(), authGuard.getEdgeServerId())
-    if (usersGroup.isFailed()) {
-        return usersGroup
-    }
-
-    const fcmRegistrationTokens = usersGroup.getData()?.map((user: UserEntity) => user.dataValues.fcm_registration_token)
 
     //4. broadcast notification to registered devices
     cloudMessageService.sendNotification(fcmRegistrationTokens, title, description, uploadResponse.getData().fileUrl)
