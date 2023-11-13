@@ -75,14 +75,14 @@ beforeAll(async () => {
   await db.connect()
 
   //create dummy user with id 1
-  db.getConnection().query(
+  await db.getConnection().query(
     "INSERT INTO users (id, username, email, password, reset_token, is_verified, verification_code, created_at) VALUES (10000, 'iyan', 'iyan@mail.com', '$2b$10$hT.yOgwP5SA3OuEKHQY1W.qpe7U1DOxAI3LcLuOt.SwJ7Hjvfv4cO', 'resettoken123', 0, '123456', '2023-09-11')"
   )
 })
 
 afterAll(async () => {
   await db.getConnection().query("DELETE FROM users WHERE id = 10000")
-  db.getConnection().query("DELETE FROM users WHERE username = 'pras'")
+  await db.getConnection().query("DELETE FROM users WHERE username = 'pras'")
 })
 
 describe("login", () => {

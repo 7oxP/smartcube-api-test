@@ -45,18 +45,18 @@ beforeAll(async () => {
   //Connect db
   await db.connect()
 
-  // db.getConnection().query('DELETE FROM user_groups WHERE edge_server_id = 1000')
-  // db.getConnection().query('DELETE FROM notifications WHERE user_id = 1000')
-  // db.getConnection().query('DELETE FROM users WHERE id = 1000')
-  // db.getConnection().query('DELETE FROM devices WHERE id = 1000')
+  // db.getConnection().query('DELETE FROM user_groups WHERE edge_server_id = 10003')
+  // db.getConnection().query('DELETE FROM notifications WHERE user_id = 10003')
+  // db.getConnection().query('DELETE FROM users WHERE id = 10003')
+  // db.getConnection().query('DELETE FROM devices WHERE id = 10003')
 
-  //create dummy data user, notification, devices, and user_groups with id 1000
+  //create dummy data user, notification, devices, and user_groups with id 10003
   try {
-    db.getConnection().query("INSERT INTO users (id, username, email, password, created_at) VALUES (1000, 'iyan', 'iyan@mail.com', 'pass123', '2023-09-09')")
-    db.getConnection().query("INSERT INTO notifications (id, user_id, title, image, description, is_viewed, created_at, updated_at) VALUES " +
-      `(1000,  1000, 'title 1', 'image 1', 'description 1', 0, '2023-09-09', '2023-09-09')`)
-    db.getConnection().query("INSERT INTO edge_servers (id, name, vendor, description, mqtt_user, mqtt_password) VALUES (1000, 'NUC 1001', 'INTEL', 'desc exmaple', 'user1', 'pass1')")
-    db.getConnection().query("INSERT INTO user_groups (user_id, edge_server_id, role_id) VALUES (1000, 1000, 1)")
+    await db.getConnection().query("INSERT INTO users (id, username, email, password, created_at) VALUES (10003, 'iyan', 'iyan@mail.com', 'pass123', '2023-09-09')")
+    await db.getConnection().query("INSERT INTO notifications (id, user_id, title, image, description, is_viewed, created_at, updated_at) VALUES " +
+      `(10003,  10003, 'title 1', 'image 1', 'description 1', 0, '2023-09-09', '2023-09-09')`)
+    await db.getConnection().query("INSERT INTO edge_servers (id, name, vendor, description, mqtt_user, mqtt_password, mqtt_pub_topic, mqtt_sub_topic) VALUES (10003, 'NUC 1001', 'INTEL', 'desc exmaple', 'user1', 'pass1', 'pub-topic-1', 'sub-topic-1')")
+    await db.getConnection().query("INSERT INTO user_groups (user_id, edge_server_id, role_id) VALUES (10003, 10003, 1)")
   } catch (error) {
     throw error
   }
@@ -66,7 +66,13 @@ beforeAll(async () => {
   notificationRepository = new NotificationRepository();
   cloudStorageService = new StorageService();
   cloudMessageService = new CloudMessagingService();
-  emailService = new EmailService('smtp.gmail.com',587,'smartcubeppi@gmail.com','ispt ujxo avvo hpoz','smartcubeppi@gmail.com')
+  const emailService = new EmailService(
+    process.env.SMTP_HOST!,
+    Number(process.env.SMTP_PORT!),
+    process.env.SMTP_USER!,
+    process.env.SMTP_USER_PASSWORD!,
+    process.env.SENDER_EMAIL!
+  )
   notificationService = new NotificationService(
     userRepository,
     notificationRepository,
@@ -76,11 +82,11 @@ beforeAll(async () => {
   );
 });
 
-afterAll(() => {
-  db.getConnection().query('DELETE FROM user_groups WHERE edge_server_id = 1000')
-  db.getConnection().query('DELETE FROM edge_servers WHERE id = 1000')
-  db.getConnection().query('DELETE FROM notifications WHERE user_id = 1000')
-  db.getConnection().query('DELETE FROM users WHERE id = 1000')
+afterAll(async () => {
+  await db.getConnection().query('DELETE FROM user_groups WHERE edge_server_id = 10003')
+  await db.getConnection().query('DELETE FROM edge_servers WHERE id = 10003')
+  await db.getConnection().query('DELETE FROM notifications WHERE user_id = 10003')
+  await db.getConnection().query('DELETE FROM users WHERE id = 10003')
 })
 
 
@@ -95,12 +101,12 @@ const file: IUploadedFile = {
 let storedNotificationID = 0
 
 
-describe("store s", () => {
+describe("store", () => {
 
   it("Store failed with user id invalid", async () => {
 
     //create auth guard
-    const authGuard = new AuthGuard(1000, "iyan@mai.com", "iyan", UserRoles.Admin, 1000); //User with id 0 is invalid or not exists
+    const authGuard = new AuthGuard(10003, "iyan2@mail.com", "iyan", UserRoles.Admin, 10003); //User with id 0 is invalid or not exists
 
     //execute usecase
     const resp = await notificationService.storeNotification(
@@ -121,7 +127,7 @@ describe("store s", () => {
   it("Store success", async () => {
 
     //create auth guard
-    const authGuard = new AuthGuard(1000, "iyan@mail.com", "iyan", UserRoles.Admin, 1000);
+    const authGuard = new AuthGuard(10003, "iyan@mail.com", "iyan", UserRoles.Admin, 10003);
 
     //execute usecase
     const res = await notificationService.storeNotification(
@@ -144,7 +150,7 @@ describe("store s", () => {
 describe("view notification", () => {
 
   it("success", async () => {
-    const authGuard = new AuthGuard(1000, "", "", UserRoles.Admin, 1000);
+    const authGuard = new AuthGuard(10003, "", "", UserRoles.Admin, 10003);
 
     const res = await notificationService.viewNotification(authGuard, storedNotificationID);
     // console.log(res.getMessage());
@@ -154,7 +160,7 @@ describe("view notification", () => {
   });
 
   it("failed unauthorized", async () => {
-    const authGuard = new AuthGuard(0, "", "", UserRoles.Admin, 1000);
+    const authGuard = new AuthGuard(0, "", "", UserRoles.Admin, 10003);
 
     const res = await notificationService.viewNotification(authGuard, storedNotificationID);
     // console.log(res.getMessage());
@@ -165,7 +171,7 @@ describe("view notification", () => {
 });
 
 describe("delete notification", () => {
-  const authGuard = new AuthGuard(1000, "iyan@gmail.com", "iyan", UserRoles.Admin, 1000);
+  const authGuard = new AuthGuard(10003, "iyan@gmail.com", "iyan", UserRoles.Admin, 10003);
 
   it("failed unauthorized", async () => {
     //create dummy data
@@ -177,7 +183,7 @@ describe("delete notification", () => {
     // );
 
     //delete notif
-    const authGuard2 = new AuthGuard(999999, "", "", UserRoles.Admin, 1000);
+    const authGuard2 = new AuthGuard(999999, "", "", UserRoles.Admin, 10003);
     const res = await notificationService.deleteNotification(
       authGuard2,
       storedNotificationID

@@ -15,33 +15,33 @@ const storeNotification = async function (
     userRepo: IUserRepository,
     cloudMessageService: ICloudMessagingService,
     cloudStorageService: IStorageService,
-    file: IUploadedFile, 
-    title: string, 
+    file: IUploadedFile,
+    title: string,
     description: string
 ): Promise<IResponse> {
 
     const userResponse = await userRepo.findByEmail(authGuard.getUserEmail())
-    if(!userResponse.getStatus()) {
+    if (userResponse.isFailed()) {
         return userResponse
     }
 
     //1. upload file to cloud storage    
     let uploadResponse = await cloudStorageService.uploadFile(file)
-    if(uploadResponse.isFailed()) {
+    if (uploadResponse.isFailed()) {
         uploadResponse.setStatusCode(OperationStatus.cloudStorageError)
         return uploadResponse
     }
 
     //2. save data to repo
     let storeResponse = await notifRepo.storeNotification(authGuard.getUserId(), title, description, uploadResponse.getData().fileUrl)
-    if(storeResponse.isFailed()) {
+    if (storeResponse.isFailed()) {
         storeResponse.setStatusCode(OperationStatus.repoError)
         return storeResponse
     }
- 
+
     //3. Fetch User Group to get the fcm registration token
     const usersGroup = await userRepo.fetchUserByGroup(authGuard.getUserId(), authGuard.getEdgeServerId())
-    if(usersGroup.isFailed()) {
+    if (usersGroup.isFailed()) {
         return usersGroup
     }
 
@@ -52,7 +52,7 @@ const storeNotification = async function (
 
     return new Response()
         .setStatus(true)
-        .setStatusCode(1)
+        .setStatusCode(OperationStatus.success)
         .setMessage("ok")
         .setData(storeResponse.getData())
 }

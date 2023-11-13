@@ -5,10 +5,12 @@ module.exports = {
   async up (q, Sequelize) {
     q.createTable("devices_edge_servers", {
       edge_server_id: {
-        type: Sequelize.DataTypes.BIGINT.UNSIGNED
+        type: Sequelize.DataTypes.BIGINT.UNSIGNED,
+        allowNull: false,
       },
       device_id: {
-        type: Sequelize.DataTypes.BIGINT.UNSIGNED
+        type: Sequelize.DataTypes.BIGINT.UNSIGNED,
+        allowNull: false,
       }
     })
   },

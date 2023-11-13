@@ -8,6 +8,7 @@ UserGroupEntity.init({
     type: DataTypes.BIGINT.UNSIGNED,
     primaryKey: true,
     allowNull: false,
+    autoIncrement: true,
   },
   user_id: {
     type: DataTypes.BIGINT.UNSIGNED,

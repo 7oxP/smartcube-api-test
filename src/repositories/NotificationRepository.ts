@@ -15,7 +15,8 @@ class NotificationRepository implements INotificationRepositories {
                 image: imageUrl,
                 description: description,
                 is_viewed: false,
-                created_at: new Date()
+                created_at: new Date(),
+                updated_at: new Date(),
             })
 
             return new Response()
