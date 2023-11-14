@@ -22,6 +22,13 @@ steps:
       - 'VERIFICATION_SECRET_KEY=${_VERIFICATION_SECRET_KEY}'
       - 'RESET_TOKEN_SECRET_KEY=${_RESET_TOKEN_SECRET_KEY}'
       - 'RESET_PASSWORD_URL=${_RESET_PASSWORD_URL}'
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - gsutil
+      - cp
+      - gs://mqtt-certificate/mqtt-ssl.crt
+      - .
   - name: gcr.io/cloud-builders/docker
     args:
       - build
