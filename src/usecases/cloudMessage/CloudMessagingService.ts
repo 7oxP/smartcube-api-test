@@ -22,13 +22,15 @@ export class CloudMessagingService implements ICloudMessagingService {
         return this.app.name != "" ? true : false
     }
 
-    async sendNotification(fcmRegistrationToken: string[], title: string, description: string, imageUrl: string): Promise<IResponse> {
+    async sendNotification(fcmRegistrationToken: string[], title: string, description: string, imageUrl: string, notificationId: string): Promise<IResponse> {
 
         let messagePayload: MulticastMessage = {
             data: {
+                notificationId: String(notificationId),
                 title: title,
                 description: description,
-                imageUrl: imageUrl
+                imageUrl: imageUrl,
+                deeplinkURL: `https://ppidev.smartcube.com/notification/${notificationId}`
             },
             tokens: fcmRegistrationToken
         };

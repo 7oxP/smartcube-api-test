@@ -1,13 +1,13 @@
-import { INotificationRepositories } from "@/contracts/repositories/INotificationRepositories";
-import { ICloudMessagingService } from "@/contracts/usecases/ICloudMessagingService";
-import { IStorageService } from "@/contracts/usecases/IStorageServices";
-import { IResponse } from "@/contracts/usecases/IResponse";
-import { Response } from "../../utils/Response";
-import { IUploadedFile } from "@/contracts/IFile";
-import { OperationStatus } from "../../constants/operations";
-import { IAuthGuard } from "@/contracts/middleware/AuthGuard";
-import { IUserRepository } from "@/contracts/repositories/IUserRepository";
-import UserEntity from "@/entities/UserEntity";
+import { INotificationRepositories } from "@/contracts/repositories/INotificationRepositories"
+import { ICloudMessagingService } from "@/contracts/usecases/ICloudMessagingService"
+import { IStorageService } from "@/contracts/usecases/IStorageServices"
+import { IResponse } from "@/contracts/usecases/IResponse"
+import { Response } from "../../utils/Response"
+import { IUploadedFile } from "@/contracts/IFile"
+import { OperationStatus } from "../../constants/operations"
+import { IAuthGuard } from "@/contracts/middleware/AuthGuard"
+import { IUserRepository } from "@/contracts/repositories/IUserRepository"
+import UserEntity from "@/entities/UserEntity"
 
 const storeNotification = async function (
     authGuard: IAuthGuard,
@@ -19,26 +19,36 @@ const storeNotification = async function (
     title: string,
     description: string
 ): Promise<IResponse> {
-
     const userResponse = await userRepo.findByEmail(authGuard.getUserEmail())
     if (userResponse.isFailed()) {
         return userResponse
     }
 
     //3. Fetch User Group to get the fcm registration token
-    const usersGroupResp = await userRepo.fetchUserByGroup(authGuard.getUserId(), authGuard.getEdgeServerId())
+    const usersGroupResp = await userRepo.fetchUserByGroup(
+        authGuard.getUserId(),
+        authGuard.getEdgeServerId()
+    )
+
     if (usersGroupResp.isFailed()) {
-        if(authGuard.getEdgeServerId() == 0 || authGuard.getEdgeServerId() == undefined) {
-            usersGroupResp.setMessage("it seems you're trying to store notification using user token")
+        if (
+            authGuard.getEdgeServerId() == 0 ||
+            authGuard.getEdgeServerId() == undefined
+        ) {
+            usersGroupResp.setMessage(
+                "it seems you're trying to store notification using user token"
+            )
             usersGroupResp.setStatusCode(OperationStatus.invalidEdgeToken)
             return usersGroupResp
         }
         return usersGroupResp
     }
 
-    const fcmRegistrationTokens = usersGroupResp.getData()?.map((user: UserEntity) => user.dataValues.fcm_registration_token)
+    const fcmRegistrationTokens = usersGroupResp
+        .getData()
+        ?.map((user: UserEntity) => user.dataValues.fcm_registration_token)
 
-    //1. upload file to cloud storage    
+    //1. upload file to cloud storage
     let uploadResponse = await cloudStorageService.uploadFile(file)
     if (uploadResponse.isFailed()) {
         uploadResponse.setStatusCode(OperationStatus.cloudStorageError)
@@ -46,14 +56,25 @@ const storeNotification = async function (
     }
 
     //2. save data to repo
-    let storeResponse = await notifRepo.storeNotification(authGuard.getUserId(), title, description, uploadResponse.getData().fileUrl)
+    let storeResponse = await notifRepo.storeNotification(
+        authGuard.getUserId(),
+        title,
+        description,
+        uploadResponse.getData().fileUrl
+    )
     if (storeResponse.isFailed()) {
         storeResponse.setStatusCode(OperationStatus.repoError)
         return storeResponse
     }
 
     //4. broadcast notification to registered devices
-    cloudMessageService.sendNotification(fcmRegistrationTokens, title, description, uploadResponse.getData().fileUrl)
+    cloudMessageService.sendNotification(
+        fcmRegistrationTokens,
+        title,
+        description,
+        uploadResponse.getData().fileUrl,
+        storeResponse.getData().id
+    )
 
     return new Response()
         .setStatus(true)
@@ -62,4 +83,5 @@ const storeNotification = async function (
         .setData(storeResponse.getData())
 }
 
-export { storeNotification };
+export { storeNotification }
+
