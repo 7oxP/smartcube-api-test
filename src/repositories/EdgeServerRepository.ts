@@ -73,7 +73,7 @@ class EdgeServerRepository implements IEdgeServerRepository {
 
     async fetchDevice(userId: number, edgeServerId: number): Promise<IResponse> {
         try {
-            const res = await EdgeServerEntity.findAll(
+            const res = await EdgeServerEntity.findOne(
                 {
                     where: {
                         id: edgeServerId,
@@ -96,10 +96,6 @@ class EdgeServerRepository implements IEdgeServerRepository {
                     ],
                 }
             )
-
-            res.map((val, i, data) => {
-                return data[i] = val.dataValues
-            })
 
             return new Response()
                 .setStatus(true)

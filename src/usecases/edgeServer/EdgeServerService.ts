@@ -7,6 +7,7 @@ import { IJWTUtil } from '@/contracts/utils/IJWTUtil';
 import { Response } from '../../utils/Response';
 import { generateRandomString } from '../../utils/String';
 import { IMQTTService } from "@/contracts/usecases/IMQTTService";
+import DeviceEntity from "@/entities/DeviceEntity";
 
 class EdgeServerService implements IEdgeServerService {
 
@@ -98,6 +99,20 @@ class EdgeServerService implements IEdgeServerService {
             //1. validate input
 
             //2. create json config representation of device
+            if (!this.deviceType.includes(type)) {
+                return new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.addDeviceError)
+                    .setMessage("invalid device type")
+            }
+
+            if (!this.deviceSourceType.includes(sourceType)) {
+                return new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.addDeviceError)
+                    .setMessage("invalid device source type")
+            }
+
             const deviceConfig = {
                 type: type,
                 usb_id: devSourceId,
@@ -115,7 +130,7 @@ class EdgeServerService implements IEdgeServerService {
             //4. sync config to the edge server
             const syncConfigRes = await this.mqttService.publish(
                 mqttConfigRes.getData().mqtt_sub_topic,
-                deviceConfig
+                `/syncEdgeConfig`
             )
             if (syncConfigRes.isFailed()) return syncConfigRes
 
@@ -163,12 +178,101 @@ class EdgeServerService implements IEdgeServerService {
         return await this.edgeServerRepo.fetchDevice(authGuard.getUserId(), edgeServerId)
     }
 
+    async fetchDevicesConfig(authGuard: IAuthGuard): Promise<IResponse> {
+        try {
+            if (authGuard.getEdgeServerId() == 0 || authGuard.getEdgeServerId() == undefined) {
+                return new Response()
+                    .setMessage("it seems you're trying to fetch devices config using user token")
+                    .setStatusCode(OperationStatus.invalidEdgeToken)
+                    .setStatus(false)
+            }
+
+            const devicesResp = await this.edgeServerRepo.fetchDevice(
+                authGuard.getUserId(),
+                authGuard.getEdgeServerId()
+            )
+
+            if (devicesResp.isFailed()) return devicesResp
+
+            const devices: DeviceEntity[] = devicesResp.getData().devices
+
+            const devicesConfig: {
+                type: any;
+                usb_id: any;
+                rtsp_address: any;
+                source_type: any;
+                assigned_model_type: string;
+                assigned_model_index: any;
+                additional_info: any;
+            }[] = []
+
+            devices.forEach((device) => {
+                devicesConfig.push({
+                    type: device.getDataValue('type'),
+                    usb_id: device.getDataValue('dev_source_id'),
+                    rtsp_address: device.getDataValue('rtsp_source_address'),
+                    source_type: device.getDataValue('source_type'),
+                    assigned_model_type: this.modelType[device.getDataValue('assigned_model_type')],
+                    assigned_model_index: device.getDataValue('assigned_model_index'),
+                    additional_info: device.getDataValue('additional_info')
+                })
+            })
+
+            return devicesResp
+                .setData(devicesConfig)
+
+        } catch (error: any) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.generateEdgeDeviceConfigError)
+                .setMessage(`generate edge devices config error ${error}`)
+        }
+
+    }
+
     updateDeviceConfig(): Promise<IResponse> {
         throw new Error('Method not implemented.');
     }
 
-    restartDevice(processIndex: number): Promise<IResponse> {
-        throw new Error('Method not implemented.');
+    async restartDevice(authGuard: IAuthGuard, processIndex: number, edgeServerId: number): Promise<IResponse> {
+
+        try {
+            const mqttConfigRes = await this.edgeServerRepo.getMqttConfig(edgeServerId)
+            if (mqttConfigRes.isFailed()) return mqttConfigRes
+
+            const restartRes = await this.mqttService.publish(
+                mqttConfigRes.getData().mqtt_sub_topic,
+                `/restartDevice ${processIndex}`
+            )
+
+            return restartRes
+        } catch (error: any) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.deviceRestartError)
+                .setMessage(`error restarting device ${error}`)
+        }
+
+    }
+
+    async startDevice(authGuard: IAuthGuard, processIndex: number, edgeServerId: number): Promise<IResponse> {
+
+        try {
+            const mqttConfigRes = await this.edgeServerRepo.getMqttConfig(edgeServerId)
+            if (mqttConfigRes.isFailed()) return mqttConfigRes
+
+            const restartRes = await this.mqttService.publish(
+                mqttConfigRes.getData().mqtt_sub_topic,
+                `/startDevice ${processIndex}`
+            )
+
+            return restartRes
+        } catch (error: any) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.deviceRestartError)
+                .setMessage(`error starting device: ${error}`)
+        }
     }
 
     generateEdgeServerConfig(authGuard: IAuthGuard): IResponse {

@@ -28,7 +28,9 @@ export interface IEdgeServerService {
         authGuard: IAuthGuard,
     ): Promise<IResponse>
     fetchDevices(authGuard: IAuthGuard, edgeServerId: number): Promise<IResponse>
+    fetchDevicesConfig(authGuard: IAuthGuard): Promise<IResponse>
     updateDeviceConfig(): Promise<IResponse>
-    restartDevice(processIndex: number): Promise<IResponse>
+    restartDevice(authGuard: IAuthGuard, processIndex: number, edgeServerId: number): Promise<IResponse>
+    startDevice(authGuard: IAuthGuard, processIndex: number, edgeServerId: number): Promise<IResponse>
     generateEdgeServerConfig(authGuard: IAuthGuard): IResponse
 }

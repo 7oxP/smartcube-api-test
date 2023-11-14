@@ -27,6 +27,9 @@ export const OperationStatus = {
 
     //edge server
     addDeviceError: -18,
+    generateEdgeDeviceConfigError: -181,
+    deviceRestartError: -182,
+    deviceStartError: -183,
 
     //mqtt
     mqttPublishError: -19,
