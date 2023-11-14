@@ -201,6 +201,30 @@ class UserRepository implements IUserRepository {
     }
   }
 
+  async fetchUserRole(userId:number): Promise<IResponse>{
+    try {
+
+      const userRole = await UserGroupEntity.findOne({
+        where: {
+          user_id: userId
+        }
+      })
+
+      const roleId = userRole?.getDataValue("role_id")
+
+      return new Response()
+        .setStatus(true)
+        .setStatusCode(OperationStatus.success)
+        .setMessage("ok")
+        .setData(roleId)
+      
+    } catch (error: any) {
+      return new Response()
+        .setStatus(false)
+        .setStatusCode(OperationStatus.repoError)
+        .setMessage(error)
+    }
+  }
 
 
   async storeResetToken(email: string, resetToken: string): Promise<IResponse> {

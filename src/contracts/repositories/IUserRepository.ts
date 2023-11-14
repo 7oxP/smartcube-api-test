@@ -7,6 +7,7 @@ export interface IUserRepository {
     findByVerificationCode(email: string, code: string): Promise<IResponse>
     updateVerificationStatus(email: string, status: boolean): Promise<IResponse>
     fetchUserByGroup(userId: number, edgeServerId: number): Promise<IResponse>
+    fetchUserRole(userId: number): Promise<IResponse>
     storeResetToken(email: string, resetToken: string): Promise<IResponse>
     updatePassword(password: string, resetToken: string): Promise<IResponse>
 }

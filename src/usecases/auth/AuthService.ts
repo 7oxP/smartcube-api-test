@@ -67,10 +67,14 @@ class AuthService implements IAuthService {
                 return userResponse
             }
 
+            const userId = userResponse.getData().getDataValue("id")
+            const userRole = await this.userRepo.fetchUserRole(userId)
+
             const accessTokenPayload = {
-                userId: userResponse.getData().getDataValue("id"),
+                userId: userId,
                 email: userResponse.getData().getDataValue("email"),
                 username: userResponse.getData().getDataValue("username"),
+                userRole: userRole.getData()
             }
 
             const generatedToken = await this.jwtUtil.encode(
