@@ -119,14 +119,67 @@ describe("add device", () => {
             "camera",
             "rtsp",
             "",
-            "",
+            "rtsp://localhost:5666",
             0,
             0,
-            ""
+            '{"location": {"latitude": 10, "longitude": 10} }'
         )   
 
         // console.log(res)
         assert.equal(res.getStatusCode(), OperationStatus.success)
+
+    })
+
+    it("failed due to invalid device type", async () => {
+
+        mockMQTTService.publish.mockReturnValue(new Response().setStatus(true))
+
+        const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
+        
+        const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
+
+        const res = await edgeServerService.addDevice(
+            authGuard,
+            edgeRes.getData()[0].id,
+            "vendor 1",
+            "123",
+            "motorcycle",
+            "rtsp",
+            "",
+            "rtsp://localhost:5666",
+            0,
+            0,
+            '{"location": {"latitude": 10, "longitude": 10} }'
+        )   
+
+        // console.log(res)
+        assert.equal(res.getStatusCode(), OperationStatus.addDeviceError)
+    })
+
+    it("failed due to invalid device source type", async () => {
+
+        mockMQTTService.publish.mockReturnValue(new Response().setStatus(true))
+
+        const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
+        
+        const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
+
+        const res = await edgeServerService.addDevice(
+            authGuard,
+            edgeRes.getData()[0].id,
+            "vendor 1",
+            "123",
+            "camera",
+            "mqtt",
+            "",
+            "rtsp://localhost:5666",
+            0,
+            0,
+            '{"location": {"latitude": 10, "longitude": 10} }'
+        )   
+
+        // console.log(res)
+        assert.equal(res.getStatusCode(), OperationStatus.addDeviceError)
 
     })
 })
@@ -140,9 +193,24 @@ describe("fetch devices", () => {
 
         const res = await edgeServerService.fetchDevices(authGuard, edgeRes.getData()[0].id)
 
+        console.log(res)
+        assert.equal(res.getStatusCode(), OperationStatus.success)
+        assert.equal(res.getData().devices.length, 1)
+    })
+
+    it("devices config found", async () => {
+
+        const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
+
+        const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
+
+        const authGuard2 = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin, edgeRes.getData()[0].id);
+
+        const res = await edgeServerService.fetchDevicesConfig(authGuard2)
+
         // console.log(res)
         assert.equal(res.getStatusCode(), OperationStatus.success)
-        assert.equal(res.getData()[0].devices.length, 1)
+        assert.equal(res.getData().length, 1)
     })
 
     it("devices not found", async () => {
@@ -152,9 +220,9 @@ describe("fetch devices", () => {
 
         const res = await edgeServerService.fetchDevices(authGuard, 10)
 
-        console.log(res)
+        // console.log(res)
         assert.equal(res.getStatusCode(), OperationStatus.success)
-        assert.equal(res.getData(), 0)
+        assert.equal(res.getData(), null)
     })
 
 })

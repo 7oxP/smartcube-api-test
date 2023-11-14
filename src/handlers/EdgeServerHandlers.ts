@@ -206,4 +206,122 @@ export class EdgeServerHandlers {
             )
         }
     }
+
+    async fetchDevicesConfig(req: ExpressRequest, res: ExpressResponse) {
+        try {
+            //1. extract jwt
+            const userData = (req as any).user
+
+            //2. build authGuard
+            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getData().edgeServerId)
+
+            //3. invoke service
+            const fetchResp = await this.edgeServerService.fetchDevicesConfig(authGuard)
+
+            if (fetchResp.isFailed()) {
+                res.status(400)
+                return res.json(fetchResp)
+            }
+
+            return res.json(fetchResp).status(200)
+
+        } catch (error: any) {
+            res.status(400)
+            return res.json((new Response())
+                .setStatus(false)
+                .setStatusCode(OperationStatus.fieldValidationError)
+                .setMessage(error)
+            )
+        }
+    }
+
+    async restartDevice(req: ExpressRequest, res: ExpressResponse) {
+        try {
+            //0. validate request
+            const result = await checkSchema({
+                edge_server_id: { notEmpty: true, },
+                process_index: { notEmpty: true, },
+            }).run(req);
+
+            for (const validation of result) {
+                if (!validation.isEmpty()) {
+                    res.status(400)
+                    return res.json((new Response())
+                        .setStatus(false)
+                        .setStatusCode(OperationStatus.fieldValidationError)
+                        .setMessage(`${validation.array()[0].msg} on field ${validation.context.fields[0]}`)
+                    )
+                }
+            }
+
+            //1. extract jwt
+            const userData = (req as any).user
+
+            //2. build authGuard
+            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin)
+
+            //3. invoke service
+            const fetchResp = await this.edgeServerService.restartDevice(authGuard, req.body.process_index, req.body.edge_server_id)
+
+            if (fetchResp.isFailed()) {
+                res.status(400)
+                return res.json(fetchResp)
+            }
+
+            return res.json(fetchResp).status(200)
+
+        } catch (error: any) {
+            res.status(400)
+            return res.json((new Response())
+                .setStatus(false)
+                .setStatusCode(OperationStatus.fieldValidationError)
+                .setMessage(error)
+            )
+        }
+    }
+
+    async startDevice(req: ExpressRequest, res: ExpressResponse) {
+        try {
+            //0. validate request
+            const result = await checkSchema({
+                edge_server_id: { notEmpty: true, },
+                process_index: { notEmpty: true, },
+            }).run(req);
+
+            for (const validation of result) {
+                if (!validation.isEmpty()) {
+                    res.status(400)
+                    return res.json((new Response())
+                        .setStatus(false)
+                        .setStatusCode(OperationStatus.fieldValidationError)
+                        .setMessage(`${validation.array()[0].msg} on field ${validation.context.fields[0]}`)
+                    )
+                }
+            }
+
+            //1. extract jwt
+            const userData = (req as any).user
+
+            //2. build authGuard
+            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin)
+
+            //3. invoke service
+            const fetchResp = await this.edgeServerService.startDevice(authGuard, req.body.process_index, req.body.edge_server_id)
+
+            if (fetchResp.isFailed()) {
+                res.status(400)
+                return res.json(fetchResp)
+            }
+
+            return res.json(fetchResp).status(200)
+
+        } catch (error: any) {
+            res.status(400)
+            return res.json((new Response())
+                .setStatus(false)
+                .setStatusCode(OperationStatus.fieldValidationError)
+                .setMessage(error)
+            )
+        }
+    }
 }

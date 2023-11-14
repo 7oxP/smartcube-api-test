@@ -52,6 +52,9 @@ export function runHttpHandlers(
     app.post('/edge-device', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.addEdgeDevice(req, res))
     app.get('/edge-server', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.fetchEdgeServers(req, res))
     app.get('/edge-device/:edge_server_id', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.fetchEdgeDevices(req, res))
+    app.get('/edge-device-config', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.fetchDevicesConfig(req, res))
+    app.post('/edge-device-restart', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.restartDevice(req, res))
+    app.post('/edge-device-start', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.startDevice(req, res))
 
     //Listening 
     app.listen(port, () => {

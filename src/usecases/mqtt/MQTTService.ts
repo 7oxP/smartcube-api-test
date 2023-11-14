@@ -59,11 +59,11 @@ export class MQTTService implements IMQTTService {
             .setData({})
     }
 
-    async publish(topic: string, payload: any): Promise<IResponse> {
+    async publish(topic: string, payload: string): Promise<IResponse> {
 
         try {
             
-            this.client.publish(topic, payload.toString());
+            this.client.publish(topic, payload);
 
             return new Response()
                 .setStatus(true)
@@ -80,14 +80,14 @@ export class MQTTService implements IMQTTService {
         }
     }
 
-    async subscribe(topic: string, payload: any): Promise<IResponse> {
+    async subscribe(topic: string, payload: string): Promise<IResponse> {
 
         this.client.subscribe([topic], () => {
             console.log(`Subscribe to topic '${topic}'`)
         })
 
         this.client.on('message', (topic, payload) => {
-            console.log('Received Message:', topic, payload.toString())
+            console.log('Received Message:', topic, payload)
         })
 
         return new Response()
