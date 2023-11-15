@@ -194,7 +194,7 @@ class EdgeServerService implements IEdgeServerService {
 
             if (devicesResp.isFailed()) return devicesResp
 
-            const devices: DeviceEntity[] = devicesResp.getData().devices
+            const devices: DeviceEntity[] = (devicesResp.getData() != null ? devicesResp.getData().devices : [])
 
             const devicesConfig: {
                 type: any;
