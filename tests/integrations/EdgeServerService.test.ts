@@ -193,7 +193,7 @@ describe("fetch devices", () => {
 
         const res = await edgeServerService.fetchDevices(authGuard, edgeRes.getData()[0].id)
 
-        console.log(res)
+        // console.log(res)
         assert.equal(res.getStatusCode(), OperationStatus.success)
         assert.equal(res.getData().devices.length, 1)
     })
