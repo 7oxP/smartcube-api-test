@@ -1,30 +1,40 @@
 import { OperationStatus } from "../../constants/operations";
-import { IAuthGuard } from "@/contracts/middleware/AuthGuard";
+import { IAuthGuard, UserRoles } from "../../contracts/middleware/AuthGuard";
 import { INotificationRepositories } from "@/contracts/repositories/INotificationRepositories";
+import { IUserRepository } from "@/contracts/repositories/IUserRepository";
 import { IResponse } from "@/contracts/usecases/IResponse";
 
 const deleteNotification = async function (
     authGuard: IAuthGuard,
     notifRepo: INotificationRepositories,
-    notificationId: number
+    userRepo: IUserRepository,
+    notificationId: number,
+    edgeServerId: number
 ): Promise<IResponse> {
 
-    //1. fetch data
+    //1. check user group membership
+    const userGroupResp = await userRepo.getUserGroupStatus(authGuard.getUserId(), edgeServerId)
+    if (userGroupResp.isFailed()) {
+        userGroupResp.setMessage("unauthorized")
+        userGroupResp.setStatusCode(OperationStatus.unauthorizedAccess)
+        return userGroupResp
+    }
+
+    //2. check role
+    if(userGroupResp.getData().role_id != UserRoles.Admin) {
+        userGroupResp.setStatus(false)
+        userGroupResp.setMessage("unauthorized")
+        userGroupResp.setStatusCode(OperationStatus.unauthorizedAccess)
+        return userGroupResp
+    }
+
+    //2. fetch data
     const notifResponse = await notifRepo.find(notificationId)
-    if(notifResponse.isFailed()) {
+    if (notifResponse.isFailed()) {
         return notifResponse
     }
 
-    //2. check ownership
-    if(notifResponse.getData().user_id != authGuard.getUserId()) {
-        return notifResponse
-            .setStatus(false)
-            .setStatusCode(OperationStatus.unauthorizedAccess)
-            .setMessage("unauthorized")
-            .setData({})
-    }
-    
-    //3. delete if user owns it
+    //3. delete
     return await notifRepo.delete(notificationId)
 }
 

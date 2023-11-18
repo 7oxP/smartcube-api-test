@@ -9,4 +9,6 @@ export interface IUserRepository {
     fetchUserByGroup(userId: number, edgeServerId: number): Promise<IResponse>
     storeResetToken(email: string, resetToken: string): Promise<IResponse>
     updatePassword(password: string, resetToken: string): Promise<IResponse>
+    updateProfile(): Promise<IResponse>
+    getUserGroupStatus(userId: number, edgeServerId: number): Promise<IResponse>
 }

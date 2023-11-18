@@ -14,7 +14,15 @@ NotificationEntity.init({
         type: DataTypes.BIGINT.UNSIGNED,
         allowNull: false,
         references: {
-          model: 'users', // 'Actors' would also work
+          model: 'users',
+          key: 'id'
+        }
+    },
+    edge_server_id: {
+        type: DataTypes.BIGINT.UNSIGNED,
+        allowNull: false,
+        references: {
+          model: 'edge_servers',
           key: 'id'
         }
     },

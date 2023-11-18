@@ -113,16 +113,6 @@ class EdgeServerService implements IEdgeServerService {
                     .setMessage("invalid device source type")
             }
 
-            const deviceConfig = {
-                type: type,
-                usb_id: devSourceId,
-                rtsp_address: rtspSourceAddress,
-                source_type: sourceType,
-                assigned_model_type: this.modelType[assignedModelType],
-                assigned_model_index: assignedModelIndex,
-                additional_info: additionalInfo
-            }
-
             //3. fetch mqtt pub-sub topic from edge server config
             const mqttConfigRes = await this.edgeServerRepo.getMqttConfig(edgeServerId)
             if (mqttConfigRes.isFailed()) return mqttConfigRes

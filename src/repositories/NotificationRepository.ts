@@ -3,14 +3,18 @@ import { IResponse } from "@/contracts/usecases/IResponse";
 import { Response } from "../utils/Response";
 import { OperationStatus } from "../constants/operations";
 import NotificationEntity from '../entities/NotificationEntity'
+import UserGroupEntity from "../entities/UserGroup";
+import { Op } from "sequelize";
+import EdgeServerEntity from "../entities/EdgeServer";
 
 class NotificationRepository implements INotificationRepositories {
 
-    async storeNotification(userId: number, title: string, description: string, imageUrl: string): Promise<IResponse> {
+    async storeNotification(userId: number, edgeServerId: number, title: string, description: string, imageUrl: string): Promise<IResponse> {
 
         try {
             const newNotif = await NotificationEntity.create({
                 user_id: userId,
+                edge_server_id: edgeServerId,
                 title: title,
                 image: imageUrl,
                 description: description,
@@ -26,7 +30,6 @@ class NotificationRepository implements INotificationRepositories {
                 .setData(newNotif.dataValues)
 
         } catch (error: any) {
-            
             return new Response()
                 .setStatus(false)
                 .setStatusCode(OperationStatus.repoError)
@@ -37,14 +40,23 @@ class NotificationRepository implements INotificationRepositories {
 
     async fetchAll(userId: number): Promise<IResponse> {
         try {
-            let notifData = await NotificationEntity.findAll({ where: { user_id: userId } })
-            // if (notifData == null) {
-            //     return new Response()
-            //         .setStatus(false)
-            //         .setStatusCode(OperationStatus.repoErrorModelNotFound)
-            //         .setMessage("model not found!")
-            //         .setData({})
-            // }
+            let notifData = await NotificationEntity.findAll({ 
+                include: {
+                    model: EdgeServerEntity,
+                    required: true,
+                    attributes: [],
+                    right: true,
+                    include: [{
+                        model: UserGroupEntity,
+                        as: "user_groups",
+                        attributes: [],
+                        where: {
+                            user_id: { [Op.eq]: userId }
+                        },
+                        right: true,
+                    }]
+                }
+            })
 
             return new Response()
                 .setStatus(true)

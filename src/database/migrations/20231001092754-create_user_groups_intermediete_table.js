@@ -16,7 +16,7 @@ module.exports = {
         references: {
           model: 'users',
           key: 'id'
-        }
+        },
       },
       role_id: {
         type: Sequelize.DataTypes.INTEGER.UNSIGNED,
@@ -28,7 +28,7 @@ module.exports = {
         references: {
           model: 'devices',
           key: 'id'
-        }
+        },
       },
     })
   },

@@ -16,7 +16,15 @@ module.exports = {
         references: {
           model: 'users',
           key: 'id'
-        }
+        },
+      },
+      edge_server_id: {
+        type: Sequelize.DataTypes.BIGINT.UNSIGNED,
+        // allowNull: false,
+        references: {
+          model: 'edge_servers',
+          key: 'id',
+        },
       },
       title: {
         type: Sequelize.DataTypes.CHAR(255),
