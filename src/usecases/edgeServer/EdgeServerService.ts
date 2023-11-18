@@ -97,8 +97,6 @@ class EdgeServerService implements IEdgeServerService {
     ): Promise<IResponse> {
         try {
             //1. validate input
-
-            //2. create json config representation of device
             if (!this.deviceType.includes(type)) {
                 return new Response()
                     .setStatus(false)
@@ -113,33 +111,9 @@ class EdgeServerService implements IEdgeServerService {
                     .setMessage("invalid device source type")
             }
 
-            const deviceConfig = {
-                type: type,
-                usb_id: devSourceId,
-                rtsp_address: rtspSourceAddress,
-                source_type: sourceType,
-                assigned_model_type: this.modelType[assignedModelType],
-                assigned_model_index: assignedModelIndex,
-                additional_info: additionalInfo
-            }
-
             //3. fetch mqtt pub-sub topic from edge server config
             const mqttConfigRes = await this.edgeServerRepo.getMqttConfig(edgeServerId)
             if (mqttConfigRes.isFailed()) return mqttConfigRes
-
-            //4. sync config to the edge server
-            const syncConfigRes = await this.mqttService.publish(
-                mqttConfigRes.getData().mqtt_sub_topic,
-                `/syncEdgeConfig`
-            )
-            if (syncConfigRes.isFailed()) return syncConfigRes
-
-            //5. send restart device instruction
-            // const restartRes = await this.mqttService.publish(
-            //     mqttConfigRes.getData().mqtt_sub_topic,
-            //     "/restartDevice 1"
-            // )
-            // if (restartRes.isFailed()) return restartRes
 
             //6. save input
             const storeRes = await this.edgeServerRepo.storeDevice(
@@ -155,6 +129,13 @@ class EdgeServerService implements IEdgeServerService {
                 additionalInfo
             )
             if (storeRes.isFailed()) return storeRes
+
+            //4. sync config to the edge server
+            const syncConfigRes = await this.mqttService.publish(
+                mqttConfigRes.getData().mqtt_sub_topic,
+                `/syncEdgeConfig`
+            )
+            if (syncConfigRes.isFailed()) return syncConfigRes
 
             return new Response()
                 .setStatus(true)
@@ -230,8 +211,74 @@ class EdgeServerService implements IEdgeServerService {
 
     }
 
-    updateDeviceConfig(): Promise<IResponse> {
-        throw new Error('Method not implemented.');
+    async updateDeviceConfig(
+        authGuard: IAuthGuard,
+        edgeServerId: number,
+        deviceId: number,
+        vendorName: string,
+        vendorNumber: string,
+        type: string,
+        sourceType: string,
+        devSourceId: string,
+        rtspSourceAddress: string,
+        assignedModelType: number,
+        assignedModelIndex: number,
+        additionalInfo: any
+    ): Promise<IResponse> {
+        try {
+            //1. validate input
+            if (!this.deviceType.includes(type)) {
+                return new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.updateDeviceError)
+                    .setMessage("invalid device type")
+            }
+
+            if (!this.deviceSourceType.includes(sourceType)) {
+                return new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.updateDeviceError)
+                    .setMessage("invalid device source type")
+            }
+            
+            //3. fetch mqtt pub-sub topic from edge server config
+            const mqttConfigRes = await this.edgeServerRepo.getMqttConfig(edgeServerId)
+            if (mqttConfigRes.isFailed()) return mqttConfigRes
+
+            //2. save input
+            const storeRes = await this.edgeServerRepo.updateDevice(
+                deviceId,
+                vendorName,
+                vendorNumber,
+                type,
+                sourceType,
+                devSourceId,
+                rtspSourceAddress,
+                assignedModelType,
+                assignedModelIndex,
+                additionalInfo
+            )
+            if (storeRes.isFailed()) return storeRes
+
+            //4. sync config to the edge server
+            const syncConfigRes = await this.mqttService.publish(
+                mqttConfigRes.getData().mqtt_sub_topic,
+                `/syncEdgeConfig`
+            )
+            if (syncConfigRes.isFailed()) return syncConfigRes
+
+            return new Response()
+                .setStatus(true)
+                .setStatusCode(OperationStatus.success)
+                .setMessage("ok")
+                .setData(storeRes.getData())
+                
+        } catch (error: any) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.updateDeviceError)
+                .setMessage(error)
+        }
     }
 
     async restartDevice(authGuard: IAuthGuard, processIndex: number, edgeServerId: number): Promise<IResponse> {
