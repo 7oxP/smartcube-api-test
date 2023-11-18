@@ -194,6 +194,57 @@ class EdgeServerRepository implements IEdgeServerRepository {
                 .setMessage(error)
         }
     }
+
+    async updateDevice(
+        deviceId: number,
+        vendorName: string,
+        vendorNumber: string,
+        type: string,
+        sourceType: string,
+        devSourceId: string,
+        rtspSourceAddress: string,
+        assignedModelType: number,
+        assignedModelIndex: number,
+        additionalInfo: any
+    ): Promise<IResponse> {
+
+        try {
+            const device = await DeviceEntity.update({
+                vendor_name: vendorName,
+                vendor_number: vendorNumber,
+                type: type,
+                source_type: sourceType,
+                dev_source_id: devSourceId,
+                rtsp_source_address: rtspSourceAddress,
+                assigned_model_type: assignedModelType,
+                assigned_model_index: assignedModelIndex,
+                additional_info: additionalInfo,
+            }, {
+                where: {
+                    id: {[Op.eq]: deviceId},
+                }
+            })
+            
+            if (device[0] == 0) {
+                return new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.repoErrorModelNotFound)
+                    .setMessage("model not found")
+            }
+
+            return new Response()
+                .setStatus(true)
+                .setStatusCode(OperationStatus.success)
+                .setMessage("ok")
+                .setData(null)
+
+        } catch (error: any) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.repoError)
+                .setMessage(error.message)
+        }
+    }
 }
 
 export { EdgeServerRepository }

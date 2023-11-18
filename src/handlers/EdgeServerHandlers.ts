@@ -133,6 +133,90 @@ export class EdgeServerHandlers {
         }
     }
 
+    async updateEdgeDevice(req: ExpressRequest, res: ExpressResponse) {
+        try {
+            //0.1 validate request
+            const validation1 = await checkSchema({
+                edge_server_id: { notEmpty: true, },
+                vendor_name: { notEmpty: true },
+                vendor_number: { notEmpty: true, },
+                type: { notEmpty: true, },
+                source_type: { notEmpty: true, },
+                dev_source_id: {},
+                rtsp_source_address: {},
+                assigned_model_type: { notEmpty: true, },
+                assigned_model_index: { notEmpty: true, },
+                additional_info: {},
+            }).run(req);
+
+            for (const validation of validation1) {
+                if (!validation.isEmpty()) {
+                    res.status(400)
+                    return res.json((new Response())
+                        .setStatus(false)
+                        .setStatusCode(OperationStatus.fieldValidationError)
+                        .setMessage(`${validation.array()[0].msg} on field ${validation.context.fields[0]}`)
+                    )
+                }
+            }
+
+            //0.2 validate request
+            const validation2 = await checkSchema({
+                id: { notEmpty: true},
+            }, ['params']).run(req);
+
+            for (const validation of validation2) {
+                if (!validation.isEmpty()) {
+                    res.status(400)
+                    return res.json((new Response())
+                        .setStatus(false)
+                        .setStatusCode(OperationStatus.fieldValidationError)
+                        .setMessage(`${validation.array()[0].msg} on param ${validation.context.fields[0]}`)
+                    )
+                }
+            }
+
+            const deviceId = parseInt(req.params.id)
+
+            //1. extract jwt
+            const userData = (req as any).user
+
+            //2. build authGuard
+            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getData().edgeServerId)
+
+            //3. invoke service
+            const addDeviceResp = await this.edgeServerService.updateDeviceConfig(
+                authGuard,
+                req.body.edge_server_id,
+                deviceId,
+                req.body.vendor_name,
+                req.body.vendor_number,
+                req.body.type,
+                req.body.source_type,
+                req.body.dev_source_id,
+                req.body.rtsp_source_address,
+                req.body.assigned_model_type,
+                req.body.assigned_model_index,
+                req.body.additional_info,
+            )
+
+            if (addDeviceResp.isFailed()) {
+                res.status(400)
+                return res.json(addDeviceResp)
+            }
+
+            return res.json(addDeviceResp).status(200)
+
+        } catch (error: any) {
+            res.status(400)
+            return res.json((new Response())
+                .setStatus(false)
+                .setStatusCode(OperationStatus.fieldValidationError)
+                .setMessage(error)
+            )
+        }
+    }
+
     async fetchEdgeServers(req: ExpressRequest, res: ExpressResponse) {
         try {
 
