@@ -8,12 +8,15 @@ import { AuthJWT } from '../middleware/AuthJWT'
 import { IJWTUtil } from '../contracts/utils/IJWTUtil'
 import { EdgeServerHandlers } from './EdgeServerHandlers'
 import { IEdgeServerService } from '@/contracts/usecases/IEdgeServerService'
+import { UserHandlers } from './UserHandlers'
+import { IUserService } from '@/contracts/usecases/IUserService'
 
 export function runHttpHandlers(
     notificationService: INotificationService,
     authService: IAuthService,
     edgeServerService: IEdgeServerService,
-    jwtUtil: IJWTUtil
+    jwtUtil: IJWTUtil,
+    userService: IUserService
 ) {
 
     //Instantiate express
@@ -29,6 +32,7 @@ export function runHttpHandlers(
     const notifHandler = new NotificationHandlers(notificationService)
     const authHandler = new AuthHandlers(authService)
     const edgeServerHandler = new EdgeServerHandlers(edgeServerService)
+    const userHandler = new UserHandlers(userService)
 
     //Middlware
     const jwtMiddleware = new AuthJWT(process.env.JWT_SECRET_KEY!, jwtUtil)
@@ -56,6 +60,9 @@ export function runHttpHandlers(
     app.get('/edge-device-config', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.fetchDevicesConfig(req, res))
     app.post('/edge-device-restart', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.restartDevice(req, res))
     app.post('/edge-device-start', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.startDevice(req, res))
+
+    //User
+    app.get('/user-profile', jwtMiddleware.authenticateToken,async (req:Request, res: Response) => userHandler.getUserProfile(req, res))
 
     //Listening 
     app.listen(port, () => {
