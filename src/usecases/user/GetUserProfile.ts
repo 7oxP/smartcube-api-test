@@ -14,7 +14,7 @@ const getUserProfile = async function (
     const userData = await userRepo.findByEmail(authGuard.getUserEmail())
 
     if (userData.isFailed()) {
-        userData.setStatusCode(OperationStatus.authUnverified)
+        userData.setStatusCode(OperationStatus.unauthorizedAccess)
         return userData
     }
 
