@@ -11,6 +11,7 @@ import { EmailService } from './usecases/email/EmailService'
 import { MQTTService } from './usecases/mqtt/MQTTService'
 import { EdgeServerService } from './usecases/edgeServer/EdgeServerService'
 import { EdgeServerRepository } from './repositories/EdgeServerRepository'
+import { UserService } from './usecases/user/UserService'
 
 async function main() {
 
@@ -47,9 +48,10 @@ async function main() {
     const notificationService = new NotificationService(userRepository, notificationRepository, cloudMessageService, cloudStorageService, emailService)
     const authService = new AuthService(userRepository, jwtUtil, hashUtil, notificationService)
     const edgeServerService = new EdgeServerService(jwtUtil, edgeServerRepository, mqttService)
+    const userService = new UserService(userRepository)
 
     //Http Handlers
-    runHttpHandlers(notificationService, authService, edgeServerService, jwtUtil)
+    runHttpHandlers(notificationService, authService, edgeServerService, jwtUtil, userService)
 }
 
 main()
