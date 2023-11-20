@@ -1,11 +1,7 @@
-import { IUserService } from "@/contracts/usecases/IUserService"
 import { IResponse } from "@/contracts/usecases/IResponse"
 import { IAuthGuard } from "@/contracts/middleware/AuthGuard"
-import { Response } from "../../utils/Response"
 import { OperationStatus } from "../../constants/operations"
 import { IUserRepository } from "@/contracts/repositories/IUserRepository"
-import { IJWTUtil } from "@/contracts/utils/IJWTUtil"
-import { IHashUtil } from "@/contracts/utils/IHashUtil"
 
 const dotenv = require("dotenv")
 
@@ -23,10 +19,9 @@ const getUserProfile = async function (
     }
 
     const userProfile = {
-        "name": userData.getData().getDataValue("username"),
         "username": userData.getData().getDataValue("username"),
         "user_email": userData.getData().getDataValue("email"),
-        "user_location":"Indonesia"
+        "user_avatar": userData.getData().getDataValue("avatar")
     }
 
     userData.setData(userProfile)
