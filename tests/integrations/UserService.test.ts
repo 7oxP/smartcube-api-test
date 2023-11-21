@@ -1,10 +1,14 @@
 import dotenv from "dotenv"
 import assert from "assert"
+import fs from "fs"
 
 import { IUserService } from "../../src/contracts/usecases/IUserService"
 import { UserService } from "../../src/usecases/user/UserService"
 import { IUserRepository } from "../../src/contracts/repositories/IUserRepository"
 import { UserRepository } from "../../src/repositories/UserRepository"
+import { IStorageService } from "../../src/contracts/usecases/IStorageServices"
+import { StorageService } from "../../src/usecases/storage/StorageService"
+import { IUploadedFile } from "../../src/contracts/IFile"
 import { OperationStatus } from "../../src/constants/operations"
 import { AuthGuard } from "../../src/middleware/AuthGuard"
 import { UserRoles } from "../../src/contracts/middleware/AuthGuard"
@@ -23,6 +27,7 @@ let db: Database = new Database(
 
 let userService: IUserService
 let userRepository: IUserRepository
+let cloudStorageService: IStorageService
 
 beforeAll(async () => {
     //Connect db
@@ -40,12 +45,21 @@ beforeAll(async () => {
 
     //Instantiate services
     userRepository = new UserRepository()
-    userService = new UserService(userRepository)
+    cloudStorageService = new StorageService()
+    userService = new UserService(userRepository, cloudStorageService)
 })
 
 afterAll(async () => {
     await db.getConnection().query("DELETE FROM users WHERE id = 10003")
 })
+
+const filePath = process.cwd() + "/tests/images/img1.png"
+const buffer = fs.readFileSync(filePath)
+const file: IUploadedFile = {
+    buffer: buffer,
+    originalname: "img1.png",
+    mimetype: "image/png",
+}
 
 describe("get user profile", () => {
     it("failed unauthorized", async () => {
@@ -72,6 +86,48 @@ describe("get user profile", () => {
         assert.equal(res.getStatusCode(), OperationStatus.success)
     })
 
-    
+    describe("update avatar profile", () => {
+        it("failed update avatar profile due to unauthorized access", async () => {
+            //create auth guard
+            const authGuard = new AuthGuard(
+                0,
+                "iyan2@mail.com",
+                "iyan",
+                UserRoles.Admin,
+                10003
+            )
+            //execute usecase
+            const resp = await userService.updateUserProfile(authGuard, file)
+
+            //assert
+            assert.equal(resp.getStatus(), false)
+            assert.equal(
+                OperationStatus.unauthorizedAccess,
+                resp.getStatusCode()
+            )
+        })
+
+        it("update avatar profile successfully", async () => {
+            //create auth guard
+            const authGuard = new AuthGuard(
+                10003,
+                "iyan@mail.com",
+                "iyan",
+                UserRoles.Admin,
+                10003
+            )
+
+            //execute usecase
+            const res = await userService.updateUserProfile(
+                authGuard,
+                file
+            )
+
+            console.log(res)
+            //assert
+            assert.ok(res.getStatus())
+            assert.equal(res.getStatusCode(), OperationStatus.success)
+        })
+    })
 })
 
