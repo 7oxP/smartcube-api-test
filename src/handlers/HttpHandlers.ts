@@ -41,8 +41,8 @@ export function runHttpHandlers(
     //Notification
     app.post('/notification', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => notifHandler.storeNotificationHandler(req, res))
     app.get('/notification', jwtMiddleware.authenticateToken , async (req: Request, res: Response) => notifHandler.fetchAllNotificationHandler(req, res))
-    app.get('/notification/:id', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => notifHandler.viewNotificationHandler(req, res))
-    app.delete('/notification/:id', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => notifHandler.deleteNotificationHandler(req, res))
+    app.get('/notification/:id/edge-server/:edge_server_id', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => notifHandler.viewNotificationHandler(req, res))
+    app.delete('/notification/:id/edge-server/:edge_server_id', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => notifHandler.deleteNotificationHandler(req, res))
     
     //Auth
     app.post('/login', async (req:Request, res: Response) => authHandler.loginHandler(req, res))

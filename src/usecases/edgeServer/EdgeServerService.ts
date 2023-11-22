@@ -115,6 +115,13 @@ class EdgeServerService implements IEdgeServerService {
             const mqttConfigRes = await this.edgeServerRepo.getMqttConfig(edgeServerId)
             if (mqttConfigRes.isFailed()) return mqttConfigRes
 
+            //5. send restart device instruction
+            // const restartRes = await this.mqttService.publish(
+            //     mqttConfigRes.getData().mqtt_sub_topic,
+            //     "/restartDevice 1"
+            // )
+            // if (restartRes.isFailed()) return restartRes
+
             //6. save input
             const storeRes = await this.edgeServerRepo.storeDevice(
                 edgeServerId,
@@ -132,7 +139,7 @@ class EdgeServerService implements IEdgeServerService {
 
             //4. sync config to the edge server
             const syncConfigRes = await this.mqttService.publish(
-                mqttConfigRes.getData().mqtt_sub_topic,
+                mqttConfigRes.getData().mqtt_pub_topic,
                 `/syncEdgeConfig`
             )
             if (syncConfigRes.isFailed()) return syncConfigRes
@@ -262,7 +269,7 @@ class EdgeServerService implements IEdgeServerService {
 
             //4. sync config to the edge server
             const syncConfigRes = await this.mqttService.publish(
-                mqttConfigRes.getData().mqtt_sub_topic,
+                mqttConfigRes.getData().mqtt_pub_topic,
                 `/syncEdgeConfig`
             )
             if (syncConfigRes.isFailed()) return syncConfigRes
@@ -288,7 +295,7 @@ class EdgeServerService implements IEdgeServerService {
             if (mqttConfigRes.isFailed()) return mqttConfigRes
 
             const restartRes = await this.mqttService.publish(
-                mqttConfigRes.getData().mqtt_sub_topic,
+                mqttConfigRes.getData().mqtt_pub_topic,
                 `/restartDevice ${processIndex}`
             )
 
@@ -309,7 +316,7 @@ class EdgeServerService implements IEdgeServerService {
             if (mqttConfigRes.isFailed()) return mqttConfigRes
 
             const restartRes = await this.mqttService.publish(
-                mqttConfigRes.getData().mqtt_sub_topic,
+                mqttConfigRes.getData().mqtt_pub_topic,
                 `/startDevice ${processIndex}`
             )
 

@@ -168,7 +168,7 @@ class UserRepository implements IUserRepository {
                 where: {
                     user_id: userId,
                     edge_server_id: edgeServerId,
-                    role_id: UserRoles.Admin,
+                    // role_id: UserRoles.Admin
                 },
             })
 
@@ -187,7 +187,43 @@ class UserRepository implements IUserRepository {
                 .setStatus(true)
                 .setStatusCode(OperationStatus.success)
                 .setMessage("ok")
-                .setData(users)
+                .setData({
+                    users: users,
+                    userGroupId: userGroupData?.getDataValue("id"),
+                })
+        } catch (error: any) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.repoError)
+                .setMessage(error)
+        }
+    }
+
+    async getUserGroupStatus(
+        userId: number,
+        edgeServerId: number
+    ): Promise<IResponse> {
+        try {
+            const userGroupData = await UserGroupEntity.findOne({
+                where: {
+                    user_id: userId,
+                    edge_server_id: edgeServerId,
+                },
+            })
+
+            if (userGroupData == null) {
+                return new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.repoErrorModelNotFound)
+                    .setMessage("model not found")
+                    .setData(null)
+            }
+
+            return new Response()
+                .setStatus(true)
+                .setStatusCode(OperationStatus.success)
+                .setMessage("ok")
+                .setData(userGroupData.dataValues)
         } catch (error: any) {
             return new Response()
                 .setStatus(false)
@@ -269,10 +305,7 @@ class UserRepository implements IUserRepository {
         }
     }
 
-    async updateProfile(
-        email: string,
-        avatarUrl: string
-    ): Promise<IResponse> {
+    async updateProfile(email: string, avatarUrl: string): Promise<IResponse> {
         try {
             const updateUser = await UserEntity.update(
                 { avatar: avatarUrl, updated_at: this.formattedTime },
@@ -280,11 +313,11 @@ class UserRepository implements IUserRepository {
             )
 
             if (updateUser[0] === 0) {
-              return new Response()
-                .setStatus(true)
-                .setStatusCode(OperationStatus.unauthorizedAccess)
-                .setMessage("Update Gagal, User Unauthorized")
-                .setData(null)
+                return new Response()
+                    .setStatus(true)
+                    .setStatusCode(OperationStatus.unauthorizedAccess)
+                    .setMessage("Update Gagal, User Unauthorized")
+                    .setData(null)
             }
 
             return new Response()
@@ -301,31 +334,30 @@ class UserRepository implements IUserRepository {
         }
     }
 
-    async findById(id: number): Promise<IResponse>{
-      try {
-        const user = await UserEntity.findOne({ where: { id: id } })
-        if (user == null) {
+    async findById(id: number): Promise<IResponse> {
+        try {
+            const user = await UserEntity.findOne({ where: { id: id } })
+            if (user == null) {
+                return new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.repoErrorModelNotFound)
+                    .setMessage("User not found")
+                    .setData(undefined)
+            }
+
+            return new Response()
+                .setStatus(true)
+                .setStatusCode(OperationStatus.success)
+                .setMessage("ok")
+                .setData(user)
+        } catch (error: any) {
             return new Response()
                 .setStatus(false)
-                .setStatusCode(OperationStatus.repoErrorModelNotFound)
-                .setMessage("User not found")
-                .setData(undefined)
+                .setStatusCode(OperationStatus.repoError)
+                .setMessage(error)
+                .setData({})
         }
-
-        return new Response()
-            .setStatus(true)
-            .setStatusCode(OperationStatus.success)
-            .setMessage("ok")
-            .setData(user)
-    } catch (error: any) {
-        return new Response()
-            .setStatus(false)
-            .setStatusCode(OperationStatus.repoError)
-            .setMessage(error)
-            .setData({})
-    }
     }
 }
 
 export { UserRepository }
-

@@ -130,6 +130,7 @@ class NotificationHandlers {
         //0. validate request
         const result = await checkSchema({
             id: { notEmpty: true, isNumeric: true },
+            edge_server_id: { notEmpty: true, isNumeric: true },
         }, ['params']).run(req);
 
         for (const validation of result) {
@@ -144,6 +145,7 @@ class NotificationHandlers {
         }
 
         const notifId = parseInt(req.params.id)
+        const edgeServerId = parseInt(req.params.edge_server_id)
 
         //1. extract jwt
         const userData = (req as any).user
@@ -152,7 +154,7 @@ class NotificationHandlers {
         const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getData().edgeServerId)
 
         //3. execute
-        const viewResponse = await this.notificationService.viewNotification(authGuard, notifId)
+        const viewResponse = await this.notificationService.viewNotification(authGuard, notifId, edgeServerId)
 
         if (viewResponse.isFailed()) {
             return res.json(viewResponse).status(400)
@@ -166,6 +168,7 @@ class NotificationHandlers {
         //0. validate request
         const result = await checkSchema({
             id: { notEmpty: true, isNumeric: true },
+            edge_server_id: { notEmpty: true, isNumeric: true },
         }, ['params']).run(req);
 
         for (const validation of result) {
@@ -180,6 +183,7 @@ class NotificationHandlers {
         }
 
         const notifId = parseInt(req.params.id)
+        const edgeServerId = parseInt(req.params.edge_server_id)
 
         //1. extract jwt
         const userData = (req as any).user
@@ -188,7 +192,7 @@ class NotificationHandlers {
         const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getData().edgeServerId)
 
         //3. execute
-        const deleteResponse = await this.notificationService.deleteNotification(authGuard, notifId)
+        const deleteResponse = await this.notificationService.deleteNotification(authGuard, notifId, edgeServerId)
 
         if (deleteResponse.isFailed()) {
             return res.json(deleteResponse).status(400)
