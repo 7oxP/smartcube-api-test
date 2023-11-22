@@ -269,7 +269,7 @@ class EdgeServerService implements IEdgeServerService {
 
             //4. sync config to the edge server
             const syncConfigRes = await this.mqttService.publish(
-                mqttConfigRes.getData().mqtt_sub_topic,
+                mqttConfigRes.getData().mqtt_pub_topic,
                 `/syncEdgeConfig`
             )
             if (syncConfigRes.isFailed()) return syncConfigRes
