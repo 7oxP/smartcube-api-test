@@ -40,7 +40,7 @@ const updateUserProfile = async function (
     }
 
     //update data
-    const updateResponse = await userRepo.updateProfileAvatar(
+    const updateResponse = await userRepo.updateProfile(
         authGuard.getUserEmail(),
         uploadResponse.getData().fileUrl
     )

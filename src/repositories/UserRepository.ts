@@ -269,7 +269,7 @@ class UserRepository implements IUserRepository {
         }
     }
 
-    async updateProfileAvatar(
+    async updateProfile(
         email: string,
         avatarUrl: string
     ): Promise<IResponse> {
