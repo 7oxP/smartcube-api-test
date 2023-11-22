@@ -59,9 +59,7 @@ class AuthService implements IAuthService {
 
             if (!userResponse.getData().getDataValue("is_verified")) {
                 userResponse.setStatus(false)
-                userResponse.setStatusCode(
-                    OperationStatus.authUnverified
-                )
+                userResponse.setStatusCode(OperationStatus.authUnverified)
                 userResponse.setMessage("User is unverified")
                 userResponse.setData(undefined)
                 return userResponse
@@ -130,6 +128,7 @@ class AuthService implements IAuthService {
                     email,
                     verificationCode
                 )
+            storeUserResponse.getData().setDataValue("verification_code", null)
             return storeUserResponse
         } catch (error: any) {
             return new Response()
@@ -199,10 +198,11 @@ class AuthService implements IAuthService {
                     .setStatusCode(OperationStatus.jwtGenerateError)
                     .setMessage("gagal update")
             }
-            const resetPassURL = process.env.RESET_PASSWORD_URL + resetToken.getData()
-            const resetPassMessage = "Silakan klik link berikut untuk mengatur ulang password Anda:<br>" +
+            const resetPassURL =
+                process.env.RESET_PASSWORD_URL + resetToken.getData()
+            const resetPassMessage =
+                "Silakan klik link berikut untuk mengatur ulang password Anda:<br>" +
                 resetPassURL
-
 
             this.notificationService.sendResetPasswordToken(
                 email,
@@ -214,7 +214,6 @@ class AuthService implements IAuthService {
                 .setStatusCode(OperationStatus.success)
                 .setMessage("reset link has been sent")
                 .setData(null)
-
         } catch (error) {
             return new Response()
                 .setStatus(false)

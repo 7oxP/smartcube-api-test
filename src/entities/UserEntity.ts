@@ -25,6 +25,10 @@ UserEntity.init({
     type: DataTypes.TEXT,
     allowNull: false
   },
+  avatar:{
+    type:DataTypes.TEXT,
+    allowNull: true
+  },
   reset_token: {
     type: DataTypes.TEXT,
     allowNull: true

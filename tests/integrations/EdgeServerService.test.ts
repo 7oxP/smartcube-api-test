@@ -226,3 +226,96 @@ describe("fetch devices", () => {
     })
 
 })
+
+describe("update device", () => {
+
+    it("success", async () => {
+
+        mockMQTTService.publish.mockReturnValue(new Response().setStatus(true))
+
+        const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
+
+        const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
+
+        const fetchRes = await edgeServerService.fetchDevices(authGuard, edgeRes.getData()[0].id)
+        // console.log(fetchRes)
+
+        const res = await edgeServerService.updateDeviceConfig(
+            authGuard,
+            edgeRes.getData()[0].id,
+            fetchRes.getData().devices[0].id,
+            "vendor 1000",
+            "PDIP-2034",
+            "camera",
+            "rtsp",
+            "",
+            "rtsp://localhost:5666",
+            0,
+            0,
+            '{"location": {"latitude": 10, "longitude": 10} }'
+        )   
+
+        // console.log(res)
+        assert.equal(res.getStatusCode(), OperationStatus.success)
+
+    })
+
+    it("failed due to invalid device type", async () => {
+
+        mockMQTTService.publish.mockReturnValue(new Response().setStatus(true))
+
+        const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
+
+        const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
+
+        const fetchRes = await edgeServerService.fetchDevices(authGuard, edgeRes.getData()[0].id)
+
+        const res = await edgeServerService.updateDeviceConfig(
+            authGuard,
+            edgeRes.getData()[0].id,
+            fetchRes.getData().id,
+            "vendor 1000",
+            "PDIP-2034",
+            "motorcycle",
+            "rtsp",
+            "",
+            "rtsp://localhost:5666",
+            0,
+            0,
+            '{"location": {"latitude": 10, "longitude": 10} }'
+        )   
+
+        // console.log(res)
+        assert.equal(res.getStatusCode(), OperationStatus.updateDeviceError)
+    })
+
+    it("failed due to invalid device source type", async () => {
+
+        mockMQTTService.publish.mockReturnValue(new Response().setStatus(true))
+
+        const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
+
+        const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
+
+        const fetchRes = await edgeServerService.fetchDevices(authGuard, edgeRes.getData()[0].id)
+
+        const res = await edgeServerService.updateDeviceConfig(
+            authGuard,
+            edgeRes.getData()[0].id,
+            fetchRes.getData().id,
+            "vendor 1000",
+            "PDIP-2034",
+            "camera",
+            "mqtt",
+            "",
+            "rtsp://localhost:5666",
+            0,
+            0,
+            '{"location": {"latitude": 10, "longitude": 10} }'
+        )   
+
+        // console.log(res)
+        assert.equal(res.getStatusCode(), OperationStatus.updateDeviceError)
+
+    })
+})

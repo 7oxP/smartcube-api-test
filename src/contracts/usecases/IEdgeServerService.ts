@@ -29,7 +29,20 @@ export interface IEdgeServerService {
     ): Promise<IResponse>
     fetchDevices(authGuard: IAuthGuard, edgeServerId: number): Promise<IResponse>
     fetchDevicesConfig(authGuard: IAuthGuard): Promise<IResponse>
-    updateDeviceConfig(): Promise<IResponse>
+    updateDeviceConfig(
+        authGuard: IAuthGuard,
+        edgeServerId: number,
+        deviceId: number,
+        vendorName: string,
+        vendorNumber: string,
+        type: string,
+        sourceType: string,
+        devSourceId: string,
+        rtspSourceAddress: string,
+        assignedModelType: number,
+        assignedModelIndex: number,
+        additionalInfo: any
+    ): Promise<IResponse>
     restartDevice(authGuard: IAuthGuard, processIndex: number, edgeServerId: number): Promise<IResponse>
     startDevice(authGuard: IAuthGuard, processIndex: number, edgeServerId: number): Promise<IResponse>
     generateEdgeServerConfig(authGuard: IAuthGuard): IResponse
