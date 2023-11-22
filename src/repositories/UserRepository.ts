@@ -171,7 +171,7 @@ class UserRepository implements IUserRepository {
         where: {
           user_id: userId,
           edge_server_id: edgeServerId,
-          role_id: UserRoles.Admin
+          // role_id: UserRoles.Admin
         }
       })
 
@@ -191,7 +191,10 @@ class UserRepository implements IUserRepository {
         .setStatus(true)
         .setStatusCode(OperationStatus.success)
         .setMessage("ok")
-        .setData(users)
+        .setData({
+          users: users,
+          userGroupId: userGroupData?.getDataValue("id")
+        })
 
     } catch (error: any) {
       return new Response()
@@ -201,7 +204,37 @@ class UserRepository implements IUserRepository {
     }
   }
 
+  async getUserGroupStatus(userId: number, edgeServerId: number): Promise<IResponse> {
+    try {
 
+      const userGroupData = await UserGroupEntity.findOne({
+        where: {
+          user_id: userId,
+          edge_server_id: edgeServerId,
+        }
+      })
+
+      if (userGroupData == null) {
+        return new Response()
+          .setStatus(false)
+          .setStatusCode(OperationStatus.repoErrorModelNotFound)
+          .setMessage("model not found")
+          .setData(null)
+      }
+
+      return new Response()
+        .setStatus(true)
+        .setStatusCode(OperationStatus.success)
+        .setMessage("ok")
+        .setData(userGroupData.dataValues)
+
+    } catch (error: any) {
+      return new Response()
+        .setStatus(false)
+        .setStatusCode(OperationStatus.repoError)
+        .setMessage(error)
+    }
+  }
 
   async storeResetToken(email: string, resetToken: string): Promise<IResponse> {
     try {
@@ -265,6 +298,11 @@ class UserRepository implements IUserRepository {
         .setMessage(error)
     }
   }
+
+  updateProfile(): Promise<IResponse> {
+    throw new Error("Method not implemented.")
+  }
+
 }
 
 export { UserRepository }

@@ -45,19 +45,28 @@ beforeAll(async () => {
   //Connect db
   await db.connect()
 
-  // db.getConnection().query('DELETE FROM user_groups WHERE edge_server_id = 10003')
-  // db.getConnection().query('DELETE FROM notifications WHERE user_id = 10003')
-  // db.getConnection().query('DELETE FROM users WHERE id = 10003')
-  // db.getConnection().query('DELETE FROM devices WHERE id = 10003')
-
   //create dummy data user, notification, devices, and user_groups with id 10003
   try {
-    await db.getConnection().query("INSERT INTO users (id, username, email, password, created_at) VALUES (10003, 'iyan', 'iyan@mail.com', 'pass123', '2023-09-09')")
-    await db.getConnection().query("INSERT INTO notifications (id, user_id, title, image, description, is_viewed, created_at, updated_at) VALUES " +
-      `(10003,  10003, 'title 1', 'image 1', 'description 1', 0, '2023-09-09', '2023-09-09')`)
+    await db.getConnection().query("INSERT INTO users (id, username, email, password, created_at) VALUES " +
+    "(10003, 'iyan', 'iyan@mail.com', 'pass123', '2023-09-09'), " + 
+    "(10004, 'ucok', 'ucok@mail.com', 'pass123', '2023-09-09'), " + 
+    "(10005, 'udin', 'udin@mail.com', 'pass123', '2023-09-09'), " +
+    "(10006, 'budi', 'budi@mail.com', 'pass123', '2023-09-09') "
+    )
+   
     await db.getConnection().query("INSERT INTO edge_servers (id, name, vendor, description, mqtt_user, mqtt_password, mqtt_pub_topic, mqtt_sub_topic) VALUES (10003, 'NUC 1001', 'INTEL', 'desc exmaple', 'user1', 'pass1', 'pub-topic-1', 'sub-topic-1')")
-    await db.getConnection().query("INSERT INTO user_groups (user_id, edge_server_id, role_id) VALUES (10003, 10003, 1)")
+   
+    await db.getConnection().query("INSERT INTO user_groups (id, user_id, edge_server_id, role_id) VALUES " +
+    "(10003, 10003, 10003, 1)," +
+    "(10004, 10004, 10003, 1)," +
+    "(10005, 10005, 10003, 2)"
+    )
+   
+    await db.getConnection().query("INSERT INTO notifications (id, user_id, edge_server_id, title, image, description, is_viewed, created_at, updated_at) VALUES " +
+      `(10003, 10003,  10003, 'title 1', 'image 1', 'description 1', 0, '2023-09-09', '2023-09-09')`)
+ 
   } catch (error) {
+    console.log(error)
     throw error
   }
 
@@ -83,10 +92,15 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await db.getConnection().query('DELETE FROM user_groups WHERE edge_server_id = 10003')
-  await db.getConnection().query('DELETE FROM edge_servers WHERE id = 10003')
-  await db.getConnection().query('DELETE FROM notifications WHERE user_id = 10003')
-  await db.getConnection().query('DELETE FROM users WHERE id = 10003')
+  try {
+    await db.getConnection().query('DELETE FROM notifications WHERE user_id = 10003')
+    await db.getConnection().query('DELETE FROM user_groups WHERE edge_server_id = 10003')
+    await db.getConnection().query('DELETE FROM edge_servers WHERE id = 10003')
+    await db.getConnection().query('DELETE FROM users WHERE id IN (10003, 10004, 10005, 10006)')
+  } catch (error) {
+    console.log(error)
+    throw error
+  }
 })
 
 
@@ -137,7 +151,7 @@ describe("store", () => {
       "wew1 desc"
     );
 
-    console.log(resp)
+    // console.log(resp)
 
     //assert
     assert.equal(resp.getStatus(), false);
@@ -171,57 +185,131 @@ describe("store", () => {
 
 describe("view notification", () => {
 
+  it("failed unauthorized", async () => {
+    const authGuard = new AuthGuard(0, "", "", UserRoles.Admin, 10003);
+
+    const res = await notificationService.viewNotification(authGuard, storedNotificationID, 10003);
+
+    assert.equal(res.getStatus(), false);
+    assert.equal(res.getStatusCode(), OperationStatus.unauthorizedAccess);
+  });
+
   it("success", async () => {
     const authGuard = new AuthGuard(10003, "", "", UserRoles.Admin, 10003);
 
-    const res = await notificationService.viewNotification(authGuard, storedNotificationID);
-    // console.log(res.getMessage());
+    const res = await notificationService.viewNotification(authGuard, storedNotificationID, 10003);
 
     assert.ok(res.getStatus());
     assert.equal(res.getStatusCode(), OperationStatus.success);
   });
 
-  it("failed unauthorized", async () => {
-    const authGuard = new AuthGuard(0, "", "", UserRoles.Admin, 10003);
+  it("success by member of the group", async () => {
+    const authGuard = new AuthGuard(10004, "", "", UserRoles.Admin, 10003);
 
-    const res = await notificationService.viewNotification(authGuard, storedNotificationID);
-    // console.log(res.getMessage());
+    const res = await notificationService.viewNotification(authGuard, storedNotificationID, 10003);
 
-    assert.equal(res.getStatus(), false);
-    assert.equal(res.getStatusCode(), OperationStatus.unauthorizedAccess);
+    assert.ok(res.getStatus());
+    assert.equal(res.getStatusCode(), OperationStatus.success);
   });
+
+  
 });
+
+describe("fetch all", () => {
+
+  it("success fetch by the owner", async () => {
+    const authGuard = new AuthGuard(10003, "", "", UserRoles.Admin, 10003);
+
+    const res = await notificationService.fetchAllNotification(authGuard);
+
+    // console.log(res)
+    assert.ok(res.getStatus());
+    assert.equal(res.getData().length, 2)
+    assert.equal(res.getStatusCode(), OperationStatus.success);
+  });
+
+  it("success fetch by user ucok", async () => {
+    const authGuard = new AuthGuard(10004, "", "", UserRoles.Admin, 10003);
+
+    const res = await notificationService.fetchAllNotification(authGuard);
+
+    // console.log(res)
+    assert.ok(res.getStatus());
+    assert.equal(res.getData().length, 2)
+    assert.equal(res.getStatusCode(), OperationStatus.success);
+  });
+
+  it("success fetch by user udin", async () => {
+    const authGuard = new AuthGuard(10005, "", "", UserRoles.Member, 10003);
+
+    const res = await notificationService.fetchAllNotification(authGuard);
+
+    // console.log(res)
+    assert.ok(res.getStatus());
+    assert.equal(res.getData().length, 2)
+    assert.equal(res.getStatusCode(), OperationStatus.success);
+  });
+
+  it("empty data due to user did not join user group with edge server id = 10003", async () => {
+    const authGuard = new AuthGuard(10006, "", "", UserRoles.Member, 10003);
+
+    const res = await notificationService.fetchAllNotification(authGuard);
+
+    // console.log(res)
+    assert.ok(res.getStatus());
+    assert.equal(res.getData().length, 0)
+    assert.equal(res.getStatusCode(), OperationStatus.success);
+  });
+
+})
 
 describe("delete notification", () => {
   const authGuard = new AuthGuard(10003, "iyan@gmail.com", "iyan", UserRoles.Admin, 10003);
 
   it("failed unauthorized", async () => {
-    //create dummy data
-    // const storeRes = await notificationService.storeNotification(
-    //   authGuard,
-    //   file,
-    //   "wew1",
-    //   "wew1 desc"
-    // );
-
     //delete notif
     const authGuard2 = new AuthGuard(999999, "", "", UserRoles.Admin, 10003);
     const res = await notificationService.deleteNotification(
       authGuard2,
-      storedNotificationID
+      storedNotificationID,
+      10003,
     );
-    // console.log(res.getMessage())
 
     //assert
     assert.equal(res.getStatus(), false);
     assert.equal(res.getStatusCode(), OperationStatus.unauthorizedAccess);
   });
 
+  it("failed unauthorized due to member doesn't have admin role", async () => {
+    //delete notif
+    const authGuard2 = new AuthGuard(10005, "", "", UserRoles.Member, 10003);
+    const res = await notificationService.deleteNotification(
+      authGuard2,
+      storedNotificationID,
+      10003,
+    );
+
+    //assert
+    assert.equal(res.getStatus(), false);
+    assert.equal(res.getStatusCode(), OperationStatus.unauthorizedAccess);
+  });
+
+  it("failed model not found", async () => {
+    //delete notif
+    const res = await notificationService.deleteNotification(authGuard, 0, 10003);
+
+    //assert
+    // console.log(res)
+    assert.equal(res.getStatus(), false);
+    assert.equal(res.getStatusCode(), OperationStatus.repoErrorModelNotFound);
+  });
+
   it("success", async () => {
     //delete notif
     const res = await notificationService.deleteNotification(
       authGuard,
-      storedNotificationID
+      storedNotificationID,
+      10003
     );
     // console.log(res);
 
@@ -230,12 +318,4 @@ describe("delete notification", () => {
     assert.equal(res.getStatusCode(), OperationStatus.success);
   });
 
-  it("failed model not found", async () => {
-    //delete notif
-    const res = await notificationService.deleteNotification(authGuard, 0);
-
-    //assert
-    assert.equal(res.getStatus(), false);
-    assert.equal(res.getStatusCode(), OperationStatus.repoErrorModelNotFound);
-  });
 });

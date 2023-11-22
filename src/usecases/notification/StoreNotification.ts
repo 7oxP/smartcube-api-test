@@ -19,12 +19,14 @@ const storeNotification = async function (
     title: string,
     description: string
 ): Promise<IResponse> {
+
+    //1. 
     const userResponse = await userRepo.findByEmail(authGuard.getUserEmail())
     if (userResponse.isFailed()) {
         return userResponse
     }
 
-    //3. Fetch User Group to get the fcm registration token
+    //2. Fetch User Group to get the fcm registration token
     const usersGroupResp = await userRepo.fetchUserByGroup(
         authGuard.getUserId(),
         authGuard.getEdgeServerId()
@@ -45,19 +47,20 @@ const storeNotification = async function (
     }
 
     const fcmRegistrationTokens = usersGroupResp
-        .getData()
+        .getData().users
         ?.map((user: UserEntity) => user.dataValues.fcm_registration_token)
 
-    //1. upload file to cloud storage
+    //3. upload file to cloud storage
     let uploadResponse = await cloudStorageService.uploadFile(file)
     if (uploadResponse.isFailed()) {
         uploadResponse.setStatusCode(OperationStatus.cloudStorageError)
         return uploadResponse
     }
 
-    //2. save data to repo
+    //4. save data to repo
     let storeResponse = await notifRepo.storeNotification(
         authGuard.getUserId(),
+        authGuard.getEdgeServerId(),
         title,
         description,
         uploadResponse.getData().fileUrl
@@ -67,7 +70,7 @@ const storeNotification = async function (
         return storeResponse
     }
 
-    //4. broadcast notification to registered devices
+    //5. broadcast notification to registered devices
     cloudMessageService.sendNotification(
         fcmRegistrationTokens,
         title,

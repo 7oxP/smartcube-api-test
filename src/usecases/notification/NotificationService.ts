@@ -47,16 +47,16 @@ class NotificationService implements INotificationService {
             )
     }
 
-    viewNotification(authGuard: IAuthGuard, id: number): Promise<IResponse> {
-        return viewNotification(authGuard, this.notifRepo, id)
+    viewNotification(authGuard: IAuthGuard, id: number, edgeServerId: number): Promise<IResponse> {
+        return viewNotification(authGuard, this.notifRepo, this.userRepo, id, edgeServerId)
     }
 
     fetchAllNotification(authGuard: IAuthGuard,): Promise<IResponse> {
         return fetchAllNotification(authGuard, this.notifRepo)
     }
 
-    deleteNotification(authGuard: IAuthGuard, id: number): Promise<IResponse> {
-        return deleteNotification(authGuard, this.notifRepo, id)
+    deleteNotification(authGuard: IAuthGuard, id: number, edgeServerId: number): Promise<IResponse> {
+        return deleteNotification(authGuard, this.notifRepo, this.userRepo, id, edgeServerId)
     }
 
     sendResetPasswordToken(email: string, resetToken: string): Promise<IResponse> {
