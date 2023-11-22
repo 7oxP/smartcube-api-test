@@ -62,7 +62,8 @@ export function runHttpHandlers(
     app.post('/edge-device-start', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.startDevice(req, res))
 
     //User
-    app.get('/user-profile', jwtMiddleware.authenticateToken,async (req:Request, res: Response) => userHandler.getUserProfile(req, res))
+    app.get('/user-profile', jwtMiddleware.authenticateToken, async (req:Request, res: Response) => userHandler.getUserProfile(req, res))
+    app.put('/user-profile/:id', jwtMiddleware.authenticateToken, async (req:Request, res: Response) => userHandler.updateUserProfile(req, res))
 
     //Listening 
     app.listen(port, () => {
