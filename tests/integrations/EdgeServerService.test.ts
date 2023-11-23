@@ -16,6 +16,8 @@ import { UserRoles } from "../../src/contracts/middleware/AuthGuard";
 import { OperationStatus } from "../../src/constants/operations";
 import { mockMQTTService } from "../../src/usecases/mqtt/__mocks__/MQTTService"
 import { Response } from "../../src/utils/Response";
+import { IStorageService } from "../../src/contracts/usecases/IStorageServices"
+import { StorageService } from "../../src/usecases/storage/StorageService"
 import moment from "moment";
 
 dotenv.config();
@@ -34,6 +36,7 @@ let userRepo: IUserRepository
 let edgeServerService: IEdgeServerService
 let userService: IUserService
 let jwtUtil: IJWTUtil
+let cloudStorageService: IStorageService
 
 //dummy variable
 let invitation_code: string = ""
@@ -48,7 +51,8 @@ beforeAll(async () => {
         jwtUtil = new JWTUtil()
         edgeServerRepo = new EdgeServerRepository()
         userRepo = new UserRepository()
-        userService = new UserService(userRepo)
+        cloudStorageService = new StorageService()
+        userService = new UserService(userRepo, cloudStorageService)
         edgeServerService = new EdgeServerService(jwtUtil, edgeServerRepo, mockMQTTService, userService)
 
         await db.connect()
