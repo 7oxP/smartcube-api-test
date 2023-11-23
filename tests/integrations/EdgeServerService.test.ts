@@ -5,6 +5,10 @@ import { IEdgeServerRepository } from "../../src/contracts/repositories/IEdgeSer
 import { IEdgeServerService } from "../../src/contracts/usecases/IEdgeServerService"
 import { EdgeServerRepository } from "../../src/repositories/EdgeServerRepository"
 import { EdgeServerService } from "../../src/usecases/edgeServer/EdgeServerService"
+import { IUserRepository } from "../../src/contracts/repositories/IUserRepository"
+import { UserRepository } from "../../src/repositories/UserRepository"
+import { UserService } from "../../src/usecases/user/UserService"
+import { IUserService } from "../../src/contracts/usecases/IUserService"
 import { IJWTUtil } from "../../src/contracts/utils/IJWTUtil";
 import { JWTUtil } from "../../src/utils/JWTUtil";
 import { AuthGuard } from "../../src/middleware/AuthGuard";
@@ -12,6 +16,7 @@ import { UserRoles } from "../../src/contracts/middleware/AuthGuard";
 import { OperationStatus } from "../../src/constants/operations";
 import { mockMQTTService } from "../../src/usecases/mqtt/__mocks__/MQTTService"
 import { Response } from "../../src/utils/Response";
+import moment from "moment";
 
 dotenv.config();
 
@@ -25,31 +30,50 @@ let db: Database = new Database(
 )
 
 let edgeServerRepo: IEdgeServerRepository
+let userRepo: IUserRepository
 let edgeServerService: IEdgeServerService
+let userService: IUserService
 let jwtUtil: IJWTUtil
+
+//dummy variable
+let invitation_code: string = ""
 
 beforeAll(async () => {
 
-    mockMQTTService.publish.mockClear()
-    mockMQTTService.subscribe.mockClear()
-    mockMQTTService.connect.mockClear()
+    try {
+        mockMQTTService.publish.mockClear()
+        mockMQTTService.subscribe.mockClear()
+        mockMQTTService.connect.mockClear()
 
-    jwtUtil = new JWTUtil()
-    edgeServerRepo = new EdgeServerRepository()    
-    edgeServerService = new EdgeServerService(jwtUtil, edgeServerRepo, mockMQTTService)
+        jwtUtil = new JWTUtil()
+        edgeServerRepo = new EdgeServerRepository()
+        userRepo = new UserRepository()
+        userService = new UserService(userRepo)
+        edgeServerService = new EdgeServerService(jwtUtil, edgeServerRepo, mockMQTTService, userService)
 
-    await db.connect()
+        await db.connect()
 
-    //create dummy user with id 10002
-    await db.getConnection().query(
-        "INSERT INTO users (id, username, email, password, reset_token, is_verified, verification_code, created_at) VALUES (10002, 'iyan', 'iyan@mail.com', '$2b$10$hT.yOgwP5SA3OuEKHQY1W.qpe7U1DOxAI3LcLuOt.SwJ7Hjvfv4cO', 'resettoken123', 0, '123456', '2023-09-11')"
-    )
+        //create dummy users
+        await db.getConnection().query(
+            "INSERT INTO users (id, username, email, password, reset_token, is_verified, verification_code, created_at) VALUES " +
+            "(10002, 'iyan', 'iyan@mail.com', '$2b$10$hT.yOgwP5SA3OuEKHQY1W.qpe7U1DOxAI3LcLuOt.SwJ7Hjvfv4cO', 'resettoken123', 0, '123456', '2023-09-11')," +
+            "(20002, 'iyan22', 'iyan22@mail.com', '$2b$10$hT.yOgwP5SA3OuEKHQY1W.qpe7U1DOxAI3LcLuOt.SwJ7Hjvfv4cO', 'resettoken123', 0, '123456', '2023-09-11')"
+        )
+
+        //create dummy edge servers
+        await db.getConnection().query("INSERT INTO edge_servers (name, vendor, description, mqtt_user, mqtt_password, mqtt_pub_topic, mqtt_sub_topic, invitation_code, invitation_expired_at) VALUES " +
+            `('NUC 1001', 'INTEL', 'desc exmaple', 'user1', 'pass1', 'pub-topic-1', 'sub-topic-1', 'wikwik', '${moment().subtract(6, 'minute').format('Y-M-d h:mm:ss')}'),` + 
+            `('NUC 1002', 'INTEL', 'desc exmaple', 'user2', 'pass2', 'pub-topic-2', 'sub-topic-2', 'yhyiii', '2024-11-03 11:48:38')`
+        )
+    } catch (error) {
+        console.log(error)
+    }
 })
 
 afterAll(async () => {
-    await db.getConnection().query("DELETE FROM user_groups WHERE user_id = 10002")
-    await db.getConnection().query("DELETE FROM edge_servers WHERE name = 'server 1'")
-    await db.getConnection().query("DELETE FROM users WHERE id = 10002")
+    await db.getConnection().query("DELETE FROM user_groups WHERE user_id in (10002, 20002)")
+    await db.getConnection().query("DELETE FROM edge_servers WHERE name in ('server 1', 'server 2')")
+    await db.getConnection().query("DELETE FROM users WHERE id in (10002, 20002)")
     await db.getConnection().query("DELETE FROM devices")
 })
 
@@ -64,6 +88,22 @@ describe("addEdgeServer", () => {
             "server 1",
             "intel",
             "desc 1"
+        )
+
+        // console.log(res)
+        assert.equal(res.getStatusCode(), OperationStatus.success)
+
+    })
+
+    //create auth guard
+    const authGuard2 = new AuthGuard(20002, "iyan22@mail.com", "iyan", UserRoles.Admin);
+
+    it("success user 2002", async () => {
+        const res = await edgeServerService.addEdgeServer(
+            authGuard2,
+            "server 2",
+            "intel",
+            "desc 2"
         )
 
         // console.log(res)
@@ -108,7 +148,7 @@ describe("add device", () => {
         mockMQTTService.publish.mockReturnValue(new Response().setStatus(true))
 
         const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
-        
+
         const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
 
         const res = await edgeServerService.addDevice(
@@ -123,7 +163,7 @@ describe("add device", () => {
             0,
             0,
             '{"location": {"latitude": 10, "longitude": 10} }'
-        )   
+        )
 
         // console.log(res)
         assert.equal(res.getStatusCode(), OperationStatus.success)
@@ -135,7 +175,7 @@ describe("add device", () => {
         mockMQTTService.publish.mockReturnValue(new Response().setStatus(true))
 
         const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
-        
+
         const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
 
         const res = await edgeServerService.addDevice(
@@ -150,7 +190,7 @@ describe("add device", () => {
             0,
             0,
             '{"location": {"latitude": 10, "longitude": 10} }'
-        )   
+        )
 
         // console.log(res)
         assert.equal(res.getStatusCode(), OperationStatus.addDeviceError)
@@ -161,7 +201,7 @@ describe("add device", () => {
         mockMQTTService.publish.mockReturnValue(new Response().setStatus(true))
 
         const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
-        
+
         const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
 
         const res = await edgeServerService.addDevice(
@@ -176,7 +216,7 @@ describe("add device", () => {
             0,
             0,
             '{"location": {"latitude": 10, "longitude": 10} }'
-        )   
+        )
 
         // console.log(res)
         assert.equal(res.getStatusCode(), OperationStatus.addDeviceError)
@@ -253,7 +293,7 @@ describe("update device", () => {
             0,
             0,
             '{"location": {"latitude": 10, "longitude": 10} }'
-        )   
+        )
 
         // console.log(res)
         assert.equal(res.getStatusCode(), OperationStatus.success)
@@ -283,7 +323,7 @@ describe("update device", () => {
             0,
             0,
             '{"location": {"latitude": 10, "longitude": 10} }'
-        )   
+        )
 
         // console.log(res)
         assert.equal(res.getStatusCode(), OperationStatus.updateDeviceError)
@@ -312,10 +352,106 @@ describe("update device", () => {
             0,
             0,
             '{"location": {"latitude": 10, "longitude": 10} }'
-        )   
+        )
 
         // console.log(res)
         assert.equal(res.getStatusCode(), OperationStatus.updateDeviceError)
 
+    })
+})
+
+describe("create invitation member", () => {
+
+    it("unauthorized due to user is not a part of user group", async () => {
+
+        const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
+        const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
+
+        const authGuard2 = new AuthGuard(10001, "iyan@mai.com", "iyan", UserRoles.Admin);
+
+        const res = await edgeServerService.createEdgeMemberInvitation(authGuard2, edgeRes.getData()[0].id)
+
+        assert.equal(res.getStatus(), false)
+        assert.equal(res.getStatusCode(), OperationStatus.unauthorizedAccess)
+        assert.equal(res.getData(), null)
+
+    })
+
+    it("unauthorized due to user is not the owner", async () => {
+
+        const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
+        const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
+
+        const authGuard2 = new AuthGuard(20001, "iyan@mai.com", "iyan", UserRoles.Admin);
+
+        const res = await edgeServerService.createEdgeMemberInvitation(authGuard2, edgeRes.getData()[0].id)
+        // console.log(res)
+        assert.equal(res.getStatus(), false)
+        assert.equal(res.getStatusCode(), OperationStatus.unauthorizedAccess)
+        assert.equal(res.getData(), null)
+    })
+
+    it("success", async () => {
+
+        const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
+        const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
+
+        const res = await edgeServerService.createEdgeMemberInvitation(authGuard, edgeRes.getData()[0].id)
+        // console.log(res)
+        assert.equal(res.getStatus(), true)
+        assert.equal(res.getStatusCode(), OperationStatus.success)
+        assert.notEqual(res.getData().invitation_code, null)
+
+        invitation_code = res.getData().invitation_code
+    })
+
+})
+
+describe("join invitation member", () => {
+
+    it("invalid code", async () => {
+
+        const authGuard = new AuthGuard(20002, "iyan@mail.com", "iyan", UserRoles.Admin);
+
+        const res = await edgeServerService.joinEdgeMemberInvitation(authGuard, "wj6fsh")
+
+        assert.equal(res.getStatus(), false)
+        assert.equal(res.getStatusCode(), OperationStatus.invitationCodeInvalid)
+        assert.equal(res.getData(), null)
+    })
+
+    it("invalid code due to expired", async () => {
+
+        const authGuard = new AuthGuard(20002, "iyan@mail.com", "iyan", UserRoles.Admin);
+
+        const res = await edgeServerService.joinEdgeMemberInvitation(authGuard, "wikwik")
+
+        assert.equal(res.getStatus(), false)
+        assert.equal(res.getStatusCode(), OperationStatus.invitationCodeExpired)
+        assert.equal(res.getData(), null)
+    })
+
+    it("success", async () => {
+
+        const authGuard = new AuthGuard(20002, "iyan@mail.com", "iyan", UserRoles.Admin);
+
+        const res = await edgeServerService.joinEdgeMemberInvitation(authGuard, "yhyiii")
+
+        // console.log(res)
+        assert.equal(res.getStatus(), true)
+        assert.equal(res.getStatusCode(), OperationStatus.success)
+        assert.notEqual(res.getData(), null)
+    })
+
+    it("failed due to user already joined the group", async () => {
+
+        const authGuard = new AuthGuard(20002, "iyan@mail.com", "iyan", UserRoles.Admin);
+
+        const res = await edgeServerService.joinEdgeMemberInvitation(authGuard, "yhyiii")
+
+        // console.log(res)
+        assert.equal(res.getStatus(), false)
+        assert.equal(res.getStatusCode(), OperationStatus.invitationCodeInvalid)
+        assert.equal(res.getData(), null)
     })
 })

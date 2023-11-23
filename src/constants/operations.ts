@@ -32,6 +32,8 @@ export const OperationStatus = {
     deviceRestartError: -182,
     deviceStartError: -183,
     deleteDeviceError: -184,
+    invitationCodeInvalid: -185,
+    invitationCodeExpired: -186,
 
     //mqtt
     mqttPublishError: -19,

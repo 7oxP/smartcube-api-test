@@ -42,6 +42,14 @@ EdgeServerEntity.init({
         type: DataTypes.STRING,
         allowNull: false,
       },
+      invitation_code: {
+        type: DataTypes.STRING(6),
+        allowNull: true,
+      },
+      invitation_expired_at: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      }
 }, {
     sequelize: db.getConnection(), 
     modelName: 'EdgeServer', 

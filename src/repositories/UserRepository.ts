@@ -236,6 +236,29 @@ class UserRepository implements IUserRepository {
     }
   }
 
+  async addUserGroup(userId: number, edgeServerId: number, roleId: UserRoles): Promise<IResponse> {
+
+    try {
+      const userGroup = await UserGroupEntity.create({
+        user_id: userId,
+        edge_server_id: edgeServerId,
+        role_id: roleId
+      })
+
+      return new Response()
+        .setStatus(true)
+        .setStatusCode(OperationStatus.success)
+        .setMessage("ok")
+        .setData(userGroup.dataValues)
+
+    } catch (error: any) {
+      return new Response()
+        .setStatus(false)
+        .setStatusCode(OperationStatus.repoError)
+        .setMessage(error.message)
+    }
+  }
+
   async storeResetToken(email: string, resetToken: string): Promise<IResponse> {
     try {
 

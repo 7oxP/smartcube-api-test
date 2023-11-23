@@ -221,10 +221,10 @@ class EdgeServerRepository implements IEdgeServerRepository {
                 additional_info: additionalInfo,
             }, {
                 where: {
-                    id: {[Op.eq]: deviceId},
+                    id: { [Op.eq]: deviceId },
                 }
             })
-            
+
             if (device[0] == 0) {
                 return new Response()
                     .setStatus(false)
@@ -243,6 +243,70 @@ class EdgeServerRepository implements IEdgeServerRepository {
                 .setStatus(false)
                 .setStatusCode(OperationStatus.repoError)
                 .setMessage(error.message)
+        }
+    }
+
+    async updateInvitationCode(edgeServerId: number, code: string | null, expire_at: Date | null): Promise<IResponse> {
+
+        try {
+            const edgeSeverUpdate = await EdgeServerEntity.update({
+                invitation_code: code,
+                invitation_expired_at: expire_at
+            }, {
+                where: {
+                    id: edgeServerId
+                }
+            })
+
+            if (edgeSeverUpdate[0] == 0) {
+                return new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.repoErrorModelNotFound)
+                    .setMessage("model not found")
+            }
+
+            return new Response()
+                .setStatus(true)
+                .setStatusCode(OperationStatus.success)
+                .setMessage("ok")
+                .setData(null)
+
+        } catch (error: any) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.repoError)
+                .setMessage(error.message)
+        }
+    }
+
+    async getEdgeServerByInvitationCode(code: string): Promise<IResponse> {
+        try {
+            const res = await EdgeServerEntity.findOne(
+                {
+                    where: {
+                        invitation_code: code,
+                    }
+                }
+            )
+
+            if (res == null) {
+                return new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.repoErrorModelNotFound)
+                    .setMessage("model not found")
+            }
+
+            return new Response()
+                .setStatus(true)
+                .setStatusCode(OperationStatus.success)
+                .setMessage("ok")
+                .setData(res)
+
+        } catch (error: any) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.repoError)
+                .setMessage(error)
         }
     }
 }
