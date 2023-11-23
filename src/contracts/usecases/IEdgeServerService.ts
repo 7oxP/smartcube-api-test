@@ -46,4 +46,6 @@ export interface IEdgeServerService {
     restartDevice(authGuard: IAuthGuard, processIndex: number, edgeServerId: number): Promise<IResponse>
     startDevice(authGuard: IAuthGuard, processIndex: number, edgeServerId: number): Promise<IResponse>
     generateEdgeServerConfig(authGuard: IAuthGuard): IResponse
+    createEdgeMemberInvitation(authGuard: IAuthGuard, edgeSeverId: number): Promise<IResponse>
+    joinEdgeMemberInvitation(authGuard: IAuthGuard, invitationCode: string): Promise<IResponse>
 }

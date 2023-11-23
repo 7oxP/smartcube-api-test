@@ -162,7 +162,7 @@ export class EdgeServerHandlers {
 
             //0.2 validate request
             const validation2 = await checkSchema({
-                id: { notEmpty: true},
+                id: { notEmpty: true },
             }, ['params']).run(req);
 
             for (const validation of validation2) {
@@ -407,5 +407,107 @@ export class EdgeServerHandlers {
                 .setMessage(error)
             )
         }
+    }
+
+    async createEdgeMemberInvitation(req: ExpressRequest, res: ExpressResponse) {
+        try {
+            //0. validate request
+            const result = await checkSchema({
+                edge_server_id: { notEmpty: true, isNumeric: true },
+            }, ['params']).run(req);
+
+            for (const validation of result) {
+                if (!validation.isEmpty()) {
+                    res.status(400)
+                    return res.json((new Response())
+                        .setStatus(false)
+                        .setStatusCode(OperationStatus.fieldValidationError)
+                        .setMessage(`${validation.array()[0].msg} on param ${validation.context.fields[0]}`)
+                    )
+                }
+            }
+
+            //1. extract jwt
+            const userData = (req as any).user
+
+            //2. build authGuard
+            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getData().edgeServerId)
+
+            //3. invoke 
+            const edgeServerId = parseInt(req.params.edge_server_id)
+            const inviteRes = await this.edgeServerService.createEdgeMemberInvitation(authGuard, edgeServerId)
+
+            if (inviteRes.isFailed()) {
+                switch (inviteRes.getStatusCode()) {
+                    case OperationStatus.unauthorizedAccess:
+                        res.status(403)
+                        break;
+                    default:
+                        res.status(400)
+                        break;
+                }
+
+                return res.json(inviteRes)
+            }
+
+            return res.json(inviteRes).status(200)
+
+        } catch (error: any) {
+            res.status(400)
+            return res.json((new Response())
+                .setStatus(false)
+                .setStatusCode(OperationStatus.fieldValidationError)
+                .setMessage(error)
+            )
+        }
+    }
+
+    async joinEdgeMemberInvitation(req: ExpressRequest, res: ExpressResponse) {
+
+        try {
+            //0.1 validate request
+            const validation1 = await checkSchema({
+                invitation_code: { notEmpty: true, },
+            }).run(req);
+
+            for (const validation of validation1) {
+                if (!validation.isEmpty()) {
+                    res.status(400)
+                    return res.json((new Response())
+                        .setStatus(false)
+                        .setStatusCode(OperationStatus.fieldValidationError)
+                        .setMessage(`${validation.array()[0].msg} on field ${validation.context.fields[0]}`)
+                    )
+                }
+            }
+
+            //1. extract jwt
+            const userData = (req as any).user
+
+            //2. build authGuard
+            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getData().edgeServerId)
+
+            //3. invoke
+            const joinResp = await this.edgeServerService.joinEdgeMemberInvitation(
+                authGuard,
+                req.body.invitation_code
+            )
+
+            if (joinResp.isFailed()) {
+                res.status(400)
+                return res.json(joinResp)
+            }
+
+            return res.json(joinResp).status(200)
+
+        } catch (error: any) {
+            res.status(400)
+            return res.json((new Response())
+                .setStatus(false)
+                .setStatusCode(OperationStatus.fieldValidationError)
+                .setMessage(error)
+            )
+        }
+
     }
 }

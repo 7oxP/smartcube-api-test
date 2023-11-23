@@ -1,14 +1,12 @@
 import { IUserService } from "@/contracts/usecases/IUserService"
 import { IResponse } from "@/contracts/usecases/IResponse"
-import { IAuthGuard } from "@/contracts/middleware/AuthGuard"
+import { IAuthGuard, UserRoles } from "@/contracts/middleware/AuthGuard"
 import { IUploadedFile } from "@/contracts/IFile"
 import { IStorageService } from "@/contracts/usecases/IStorageServices";
-import { Response } from "../../utils/Response"
-import { OperationStatus } from "../../constants/operations"
 import { IUserRepository } from "@/contracts/repositories/IUserRepository"
-import { IJWTUtil } from "@/contracts/utils/IJWTUtil"
-import { IHashUtil } from "@/contracts/utils/IHashUtil"
 import { getUserProfile } from "./GetUserProfile"
+import { getUserGroupStatus } from "./GetUserGroupStatus"
+import { addUserGroup } from "./AddUserGroup"
 import { updateUserProfile } from "./UpdateUserProfile"
 
 class UserService implements IUserService {
@@ -24,6 +22,14 @@ class UserService implements IUserService {
         return getUserProfile(authGuard, this.userRepo)
     }
 
+    async getUserGroupStatus(authGuard: IAuthGuard, edgeServerId: number): Promise<IResponse> {
+        return getUserGroupStatus(this.userRepo, authGuard, edgeServerId)
+    }
+
+    async addUserGroup(authGuard: IAuthGuard, edgeServerId: number, roleId: UserRoles): Promise<IResponse> {
+        return addUserGroup(this.userRepo, authGuard.getUserId(), edgeServerId, roleId) 
+    }
+    
     async updateUserProfile(authGuard: IAuthGuard, file: IUploadedFile): Promise<IResponse> {
         return updateUserProfile(authGuard, this.userRepo, this.storageService, file)
     }
