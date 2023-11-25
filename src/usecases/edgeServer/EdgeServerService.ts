@@ -141,6 +141,7 @@ class EdgeServerService implements IEdgeServerService {
             .setStatusCode(OperationStatus.success)
             .setMessage("ok")
             .setData({
+                edgeServerId: res.getData().id,
                 mqtt_user: mqttConfig.mqttUser,
                 mqtt_password: mqttConfig.mqttPassword,
                 mqtt_pub_topic: mqttConfig.mqttPubTopic,

@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "root",
-    "password": null,
+    "username": "smartcube",
+    "password": "smartcube",
     "database": "database_dev",
-    "host": "127.0.0.1",
+    "host": "34.29.156.119",
     "dialect": "mysql"
   },
   "test": {
