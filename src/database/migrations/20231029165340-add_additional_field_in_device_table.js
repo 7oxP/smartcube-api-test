@@ -11,12 +11,8 @@ module.exports = {
       type: Sequelize.DataTypes.STRING(32),
       allowNull: false,
     })
-    q.addColumn("devices", "dev_source_id", {
-      type: Sequelize.DataTypes.STRING,
-      allowNull: true,
-    })
-    q.addColumn("devices", "rtsp_source_address", {
-      type: Sequelize.DataTypes.STRING,
+    q.addColumn("devices", "source_address", {
+      type: Sequelize.DataTypes.TEXT,
       allowNull: true,
     })
     q.addColumn("devices", "assigned_model_type", {

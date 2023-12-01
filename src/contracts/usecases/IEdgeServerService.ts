@@ -17,8 +17,7 @@ export interface IEdgeServerService {
         vendorNumber: string,
         type: string,
         sourceType: string,
-        devSourceId: string,
-        rtspSourceAddress: string,
+        sourceAddress: string,
         assignedModelType: number,
         assignedModelIndex: number,
         additionalInfo: any
@@ -37,8 +36,7 @@ export interface IEdgeServerService {
         vendorNumber: string,
         type: string,
         sourceType: string,
-        devSourceId: string,
-        rtspSourceAddress: string,
+        sourceAddress: string,
         assignedModelType: number,
         assignedModelIndex: number,
         additionalInfo: any

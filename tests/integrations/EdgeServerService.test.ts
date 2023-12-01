@@ -162,7 +162,6 @@ describe("add device", () => {
             "123",
             "camera",
             "rtsp",
-            "",
             "rtsp://localhost:5666",
             0,
             0,
@@ -189,7 +188,6 @@ describe("add device", () => {
             "123",
             "motorcycle",
             "rtsp",
-            "",
             "rtsp://localhost:5666",
             0,
             0,
@@ -215,7 +213,6 @@ describe("add device", () => {
             "123",
             "camera",
             "mqtt",
-            "",
             "rtsp://localhost:5666",
             0,
             0,
@@ -255,6 +252,7 @@ describe("fetch devices", () => {
         // console.log(res)
         assert.equal(res.getStatusCode(), OperationStatus.success)
         assert.equal(res.getData().length, 1)
+        assert.notEqual(res.getData()[0].source_address, null)
     })
 
     it("devices not found", async () => {
@@ -292,7 +290,6 @@ describe("update device", () => {
             "PDIP-2034",
             "camera",
             "rtsp",
-            "",
             "rtsp://localhost:5666",
             0,
             0,
@@ -322,7 +319,6 @@ describe("update device", () => {
             "PDIP-2034",
             "motorcycle",
             "rtsp",
-            "",
             "rtsp://localhost:5666",
             0,
             0,
@@ -351,7 +347,6 @@ describe("update device", () => {
             "PDIP-2034",
             "camera",
             "mqtt",
-            "",
             "rtsp://localhost:5666",
             0,
             0,
