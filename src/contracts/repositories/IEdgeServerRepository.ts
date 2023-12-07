@@ -45,4 +45,8 @@ export interface IEdgeServerRepository {
         assignedModelIndex: number,
         additionalInfo: any
     ): Promise<IResponse>
+
+    updateInvitationCode(edgeServerId: number, code: string|null, expire_at: Date|null): Promise<IResponse>
+
+    getEdgeServerByInvitationCode(code: string): Promise<IResponse>
 }

@@ -47,8 +47,8 @@ async function main() {
     //Internal Services (Usecases)
     const notificationService = new NotificationService(userRepository, notificationRepository, cloudMessageService, cloudStorageService, emailService)
     const authService = new AuthService(userRepository, jwtUtil, hashUtil, notificationService)
-    const edgeServerService = new EdgeServerService(jwtUtil, edgeServerRepository, mqttService)
-    const userService = new UserService(userRepository)
+    const userService = new UserService(userRepository, cloudStorageService)
+    const edgeServerService = new EdgeServerService(jwtUtil, edgeServerRepository, mqttService, userService)
 
     //Http Handlers
     runHttpHandlers(notificationService, authService, edgeServerService, jwtUtil, userService)

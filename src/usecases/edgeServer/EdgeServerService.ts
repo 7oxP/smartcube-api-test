@@ -8,6 +8,8 @@ import { Response } from '../../utils/Response';
 import { generateRandomString } from '../../utils/String';
 import { IMQTTService } from "@/contracts/usecases/IMQTTService";
 import DeviceEntity from "@/entities/DeviceEntity";
+import { IUserService } from "@/contracts/usecases/IUserService";
+import moment from "moment";
 
 class EdgeServerService implements IEdgeServerService {
 
@@ -18,14 +20,79 @@ class EdgeServerService implements IEdgeServerService {
     private jwtUtil: IJWTUtil;
     private edgeServerRepo: IEdgeServerRepository
     private mqttService: IMQTTService
+    private userService: IUserService
 
     constructor(
         jwtUtil: IJWTUtil,
         edgeServerRepo: IEdgeServerRepository,
-        mqttService: IMQTTService) {
+        mqttService: IMQTTService,
+        userService: IUserService,
+    ) {
         this.jwtUtil = jwtUtil
         this.edgeServerRepo = edgeServerRepo
         this.mqttService = mqttService
+        this.userService = userService
+    }
+
+    async createEdgeMemberInvitation(authGuard: IAuthGuard, edgeSeverId: number): Promise<IResponse> {
+
+        //1. fetch user group
+        const userGroupResp = await this.userService.getUserGroupStatus(authGuard, edgeSeverId)
+        if(userGroupResp.isFailed()) return userGroupResp
+
+        //2. check ownership
+        if(userGroupResp.getData().role_id != UserRoles.Admin) {
+            userGroupResp.setStatus(false)
+            userGroupResp.setData(null)
+            userGroupResp.setMessage("unauthorized")
+            userGroupResp.setStatusCode(OperationStatus.unauthorizedAccess)
+            return userGroupResp
+        }
+        
+        //3. generate invitation code
+        const invitationCode = generateRandomString(12)
+
+        //4. save invitation code & expire date
+        this.edgeServerRepo.updateInvitationCode(edgeSeverId, invitationCode, moment().add(5, 'minute').toDate())
+
+        userGroupResp.setData({'invitation_code': invitationCode})
+        userGroupResp.setMessage("ok")
+        return userGroupResp
+    }
+
+    async joinEdgeMemberInvitation(authGuard: IAuthGuard, invitationCode: string): Promise<IResponse> {
+        
+        const edgeServerResp = await this.edgeServerRepo.getEdgeServerByInvitationCode(invitationCode)
+        
+        if(edgeServerResp.isFailed()) {
+            edgeServerResp.setMessage("invitation code invalid")
+            edgeServerResp.setStatusCode(OperationStatus.invitationCodeInvalid)
+            return edgeServerResp
+        }
+
+        if(new Date(edgeServerResp.getData().invitation_expired_at) < new Date()) {            
+            edgeServerResp.setMessage("invitation code expired")
+            edgeServerResp.setStatusCode(OperationStatus.invitationCodeExpired)
+            edgeServerResp.setData(null)
+            edgeServerResp.setStatus(false)
+            return edgeServerResp
+        }
+
+        const userGroupResp = await this.userService.getUserGroupStatus(authGuard, edgeServerResp.getData().id)
+        if(userGroupResp.getStatus()) {
+            userGroupResp.setStatus(false)
+            userGroupResp.setStatusCode(OperationStatus.invitationCodeInvalid)
+            userGroupResp.setMessage("you are already join this group")
+            userGroupResp.setData(null)
+            return userGroupResp
+        }
+
+        const addUserGroupResp = await this.userService.addUserGroup(authGuard, edgeServerResp.getData().id, UserRoles.Member)
+        if(addUserGroupResp.isFailed()) {
+            return addUserGroupResp
+        }        
+
+        return addUserGroupResp
     }
 
     async addEdgeServer(
@@ -74,6 +141,7 @@ class EdgeServerService implements IEdgeServerService {
             .setStatusCode(OperationStatus.success)
             .setMessage("ok")
             .setData({
+                edgeServerId: res.getData().id,
                 mqtt_user: mqttConfig.mqttUser,
                 mqtt_password: mqttConfig.mqttPassword,
                 mqtt_pub_topic: mqttConfig.mqttPubTopic,

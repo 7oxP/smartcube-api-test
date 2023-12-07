@@ -59,9 +59,12 @@ export function runHttpHandlers(
     app.get('/edge-device-config', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.fetchDevicesConfig(req, res))
     app.post('/edge-device-restart', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.restartDevice(req, res))
     app.post('/edge-device-start', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.startDevice(req, res))
+    app.get('/edge-server-user-invite/:edge_server_id', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.createEdgeMemberInvitation(req, res))
+    app.post('/edge-server-user-join', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.joinEdgeMemberInvitation(req, res))
 
     //User
-    app.get('/user-profile', jwtMiddleware.authenticateToken,async (req:Request, res: Response) => userHandler.getUserProfile(req, res))
+    app.get('/user-profile', jwtMiddleware.authenticateToken, async (req:Request, res: Response) => userHandler.getUserProfile(req, res))
+    app.put('/user-profile/:id', jwtMiddleware.authenticateToken, async (req:Request, res: Response) => userHandler.updateUserProfile(req, res))
 
     //Listening 
     app.listen(port, () => {

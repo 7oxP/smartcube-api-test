@@ -7,7 +7,7 @@
     "dev": "tsc && nodemon ./build/app.js",
     "start": "tsc && node ./build/app.js",
     "build": "tsc",
-    "test": "jest --detectOpenHandles",
+    "test": "jest --silent --detectOpenHandles",
     "test-coverage": "jest --collect-coverage --detectOpenHandles"
   },
   "author": "",
@@ -42,6 +42,7 @@
     "firebase": "^10.4.0",
     "firebase-admin": "^11.10.1",
     "mariadb": "^3.2.0",
+    "moment": "^2.29.4",
     "mqtt": "^5.1.4",
     "mysql2": "^3.6.1",
     "nodemailer": "^6.9.6",

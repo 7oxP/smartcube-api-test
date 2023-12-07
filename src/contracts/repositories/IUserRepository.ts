@@ -1,3 +1,4 @@
+import { UserRoles } from "../middleware/AuthGuard";
 import { IResponse } from "../usecases/IResponse";
 
 export interface IUserRepository {
@@ -7,8 +8,10 @@ export interface IUserRepository {
     findByVerificationCode(email: string, code: string): Promise<IResponse>
     updateVerificationStatus(email: string, status: boolean): Promise<IResponse>
     fetchUserByGroup(userId: number, edgeServerId: number): Promise<IResponse>
+    addUserGroup(userId: number, edgeServerId: number, roleId: UserRoles): Promise<IResponse> 
     storeResetToken(email: string, resetToken: string): Promise<IResponse>
     updatePassword(password: string, resetToken: string): Promise<IResponse>
-    updateProfile(): Promise<IResponse>
+    updateProfile(email: string, avatarUrl: string): Promise<IResponse>
+    findById(id: number): Promise<IResponse>
     getUserGroupStatus(userId: number, edgeServerId: number): Promise<IResponse>
 }
