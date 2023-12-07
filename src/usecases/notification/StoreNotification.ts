@@ -15,7 +15,11 @@ const storeNotification = async function (
     userRepo: IUserRepository,
     cloudMessageService: ICloudMessagingService,
     cloudStorageService: IStorageService,
-    file: IUploadedFile,
+    file: IUploadedFile | null,
+    deviceId: number,
+    deviceType: string,
+    objectLabel: string,
+    riskLevel: string,
     title: string,
     description: string
 ): Promise<IResponse> {
@@ -50,20 +54,29 @@ const storeNotification = async function (
         .getData().users
         ?.map((user: UserEntity) => user.dataValues.fcm_registration_token)
 
-    //3. upload file to cloud storage
-    let uploadResponse = await cloudStorageService.uploadFile(file)
-    if (uploadResponse.isFailed()) {
-        uploadResponse.setStatusCode(OperationStatus.cloudStorageError)
-        return uploadResponse
+    
+    let uploadResponse = null
+
+    if (file != null) {
+        //3. upload file to cloud storage
+        uploadResponse = await cloudStorageService.uploadFile(file)
+        if (uploadResponse.isFailed()) {
+            uploadResponse.setStatusCode(OperationStatus.cloudStorageError)
+            return uploadResponse
+        }
     }
 
     //4. save data to repo
     let storeResponse = await notifRepo.storeNotification(
         authGuard.getUserId(),
         authGuard.getEdgeServerId(),
+        deviceId,
+        deviceType,
+        objectLabel,
+        riskLevel,
         title,
         description,
-        uploadResponse.getData().fileUrl
+        uploadResponse == null ? null : uploadResponse.getData().fileUrl
     )
     if (storeResponse.isFailed()) {
         storeResponse.setStatusCode(OperationStatus.repoError)
@@ -75,7 +88,7 @@ const storeNotification = async function (
         fcmRegistrationTokens,
         title,
         description,
-        uploadResponse.getData().fileUrl,
+        uploadResponse == null ? "" : uploadResponse.getData().fileUrl,
         storeResponse.getData().id
     )
 

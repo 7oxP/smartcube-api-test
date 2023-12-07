@@ -1,7 +1,7 @@
 import { OperationStatus } from "../../constants/operations"
 import { IAuthGuard, UserRoles } from '../../contracts/middleware/AuthGuard';
 import { IEdgeServerRepository } from '@/contracts/repositories/IEdgeServerRepository';
-import { IEdgeServerService } from '@/contracts/usecases/IEdgeServerService'
+import { IEdgeServerService, SensorData } from '@/contracts/usecases/IEdgeServerService'
 import { IResponse } from '../../contracts/usecases/IResponse';
 import { IJWTUtil } from '@/contracts/utils/IJWTUtil';
 import { Response } from '../../utils/Response';
@@ -13,9 +13,9 @@ import moment from "moment";
 
 class EdgeServerService implements IEdgeServerService {
 
-    private modelType = ["objectDetection",]
-    private deviceType = ['camera']
-    private deviceSourceType = ['usb', 'rtsp']
+    private modelType = ['objectDetection', 'dataAnalytic']
+    private deviceType = ['camera', 'sensor']
+    private deviceSourceType = ['usb', 'rtsp', 'http']
 
     private jwtUtil: IJWTUtil;
     private edgeServerRepo: IEdgeServerRepository
@@ -32,6 +32,36 @@ class EdgeServerService implements IEdgeServerService {
         this.edgeServerRepo = edgeServerRepo
         this.mqttService = mqttService
         this.userService = userService
+    }
+
+    async storeSensorData(authGuard: IAuthGuard, deviceId: number, sensorData: SensorData[]): Promise<IResponse> {
+        if (authGuard.getEdgeServerId() == 0 || authGuard.getEdgeServerId() == undefined) {
+            return new Response()
+                .setMessage("invalid edge token")
+                .setStatusCode(OperationStatus.invalidEdgeToken)
+                .setStatus(false)
+        }
+
+        // console.log(sensorData)
+        sensorData.map((val, i, data) => {
+            data[i].edge_server_id = authGuard.getEdgeServerId()
+        })
+        
+        const res = await this.edgeServerRepo.storeSensorData(sensorData)
+        return res
+    }   
+
+    async readSensorDataByDevice(authGuard: IAuthGuard, edgeServerId: number, deviceId: number, startDate: string, endDate: string): Promise<IResponse> {
+        
+        //1. fetch user group
+        const userGroupResp = await this.userService.getUserGroupStatus(authGuard, edgeServerId)
+        if(userGroupResp.isFailed()) return userGroupResp
+
+        const startDateConf = new Date(startDate)
+        const endDateConf = new Date(endDate)
+        const res = await this.edgeServerRepo.readSensorData(edgeServerId, deviceId, startDateConf, endDateConf)
+
+        return res
     }
 
     async createEdgeMemberInvitation(authGuard: IAuthGuard, edgeSeverId: number): Promise<IResponse> {
@@ -102,7 +132,7 @@ class EdgeServerService implements IEdgeServerService {
         description: string
     ): Promise<IResponse> {
 
-        //1. validate
+        //1. validatedevSourceId: string,
         // if(authGuard.getUserRole() != UserRoles.Admin) 
         //     return new Response()
         //         .setStatus(false)
@@ -157,8 +187,7 @@ class EdgeServerService implements IEdgeServerService {
         vendorNumber: string,
         type: string,
         sourceType: string,
-        devSourceId: string,
-        rtspSourceAddress: string,
+        sourceAddress: string,
         assignedModelType: number,
         assignedModelIndex: number,
         additionalInfo: any
@@ -197,8 +226,7 @@ class EdgeServerService implements IEdgeServerService {
                 vendorNumber,
                 type,
                 sourceType,
-                devSourceId,
-                rtspSourceAddress,
+                sourceAddress,
                 assignedModelType,
                 assignedModelIndex,
                 additionalInfo
@@ -253,10 +281,10 @@ class EdgeServerService implements IEdgeServerService {
             const devices: DeviceEntity[] = (devicesResp.getData() != null ? devicesResp.getData().devices : [])
 
             const devicesConfig: {
+                device_id: any;
                 type: any;
-                usb_id: any;
-                rtsp_address: any;
                 source_type: any;
+                source_address: any;
                 assigned_model_type: string;
                 assigned_model_index: any;
                 additional_info: any;
@@ -264,10 +292,10 @@ class EdgeServerService implements IEdgeServerService {
 
             devices.forEach((device) => {
                 devicesConfig.push({
+                    device_id: device.getDataValue('id'),
                     type: device.getDataValue('type'),
-                    usb_id: device.getDataValue('dev_source_id'),
-                    rtsp_address: device.getDataValue('rtsp_source_address'),
                     source_type: device.getDataValue('source_type'),
+                    source_address: device.getDataValue('source_address'),
                     assigned_model_type: this.modelType[device.getDataValue('assigned_model_type')],
                     assigned_model_index: device.getDataValue('assigned_model_index'),
                     additional_info: device.getDataValue('additional_info')
@@ -294,8 +322,7 @@ class EdgeServerService implements IEdgeServerService {
         vendorNumber: string,
         type: string,
         sourceType: string,
-        devSourceId: string,
-        rtspSourceAddress: string,
+        sourceAddress: string,
         assignedModelType: number,
         assignedModelIndex: number,
         additionalInfo: any
@@ -327,8 +354,7 @@ class EdgeServerService implements IEdgeServerService {
                 vendorNumber,
                 type,
                 sourceType,
-                devSourceId,
-                rtspSourceAddress,
+                sourceAddress,
                 assignedModelType,
                 assignedModelIndex,
                 additionalInfo

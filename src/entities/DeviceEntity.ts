@@ -26,12 +26,8 @@ DeviceEntity.init({
         type: DataTypes.STRING(32),
         allowNull: false,
     },
-    dev_source_id: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-    rtsp_source_address: {
-        type: DataTypes.STRING,
+    source_address: {
+        type: DataTypes.TEXT,
         allowNull: true,
     },
     assigned_model_type: {

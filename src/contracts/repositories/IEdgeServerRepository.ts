@@ -1,5 +1,5 @@
+import { SensorData } from "../usecases/IEdgeServerService";
 import { IResponse } from "../usecases/IResponse";
-
 
 export interface IEdgeServerRepository {
 
@@ -26,8 +26,7 @@ export interface IEdgeServerRepository {
         vendorNumber: string,
         type: string,
         sourceType: string,
-        devSourceId: string,
-        rtspSourceAddress: string,
+        sourceAddress: string,
         assignedModelType: number,
         assignedModelIndex: number,
         additionalInfo: any
@@ -39,8 +38,7 @@ export interface IEdgeServerRepository {
         vendorNumber: string,
         type: string,
         sourceType: string,
-        devSourceId: string,
-        rtspSourceAddress: string,
+        sourceAddress: string,
         assignedModelType: number,
         assignedModelIndex: number,
         additionalInfo: any
@@ -49,4 +47,8 @@ export interface IEdgeServerRepository {
     updateInvitationCode(edgeServerId: number, code: string|null, expire_at: Date|null): Promise<IResponse>
 
     getEdgeServerByInvitationCode(code: string): Promise<IResponse>
+
+    storeSensorData(data: SensorData[]): Promise<IResponse>
+
+    readSensorData(edgeServerId: number, deviceId: number|null, startDate: Date, endDate: Date): Promise<IResponse>
 }
