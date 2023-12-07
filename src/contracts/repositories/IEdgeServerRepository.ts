@@ -1,5 +1,5 @@
+import { SensorData } from "../usecases/IEdgeServerService";
 import { IResponse } from "../usecases/IResponse";
-
 
 export interface IEdgeServerRepository {
 
@@ -47,4 +47,8 @@ export interface IEdgeServerRepository {
     updateInvitationCode(edgeServerId: number, code: string|null, expire_at: Date|null): Promise<IResponse>
 
     getEdgeServerByInvitationCode(code: string): Promise<IResponse>
+
+    storeSensorData(data: SensorData[]): Promise<IResponse>
+
+    readSensorData(edgeServerId: number, deviceId: number|null, startDate: Date, endDate: Date): Promise<IResponse>
 }

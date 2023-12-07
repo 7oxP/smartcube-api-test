@@ -4,6 +4,7 @@ import UserGroupEntity from "./UserGroup";
 import DeviceEntity from "./DeviceEntity";
 import DeviceEdgeServerEntity from "./DeviceEdgeServer";
 import NotificationEntity from "./NotificationEntity";
+import SensorDataEntity from "./SensorDataEntity";
 
 class EdgeServerEntity extends Model {}
 
@@ -65,5 +66,11 @@ NotificationEntity.belongsTo(EdgeServerEntity, {foreignKey: "edge_server_id"})
 
 EdgeServerEntity.belongsToMany(DeviceEntity, {through: DeviceEdgeServerEntity, as: "devices"})
 DeviceEntity.belongsToMany(EdgeServerEntity, {through: DeviceEdgeServerEntity, as: "edge_servers"})
+
+EdgeServerEntity.hasMany(SensorDataEntity, {foreignKey: "edge_server_id", as: "sensor_data"})
+SensorDataEntity.belongsTo(EdgeServerEntity, {foreignKey: "edge_server_id"})
+
+DeviceEntity.hasMany(SensorDataEntity, {foreignKey: "device_id", as: "sensor_data"})
+SensorDataEntity.belongsTo(DeviceEntity, {foreignKey: "device_id"})
 
 export default EdgeServerEntity

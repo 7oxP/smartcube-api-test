@@ -8,9 +8,69 @@ import { Response } from "../utils/Response";
 import DeviceEntity from "../entities/DeviceEntity";
 import { Op } from "sequelize";
 import { db } from "../entities/BaseEntity";
-
+import SensorDataEntity from "../entities/SensorDataEntity";
 
 class EdgeServerRepository implements IEdgeServerRepository {
+
+    async readSensorData(edgeServerId: number, deviceId: number | null, startDate: Date, endDate: Date): Promise<IResponse> {
+
+        try {
+            if (startDate > endDate) {
+                return new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.invalidDateRange)
+                    .setMessage("invalid date range")
+            }
+
+            let q1 = null
+
+            if (deviceId != null) {
+                q1 = {
+                    edge_server_id: edgeServerId,
+                    device_id: deviceId,
+                    captured_at: { [Op.between]: [startDate, endDate] },
+                }
+            } else {
+                q1 = {
+                    edge_server_id: edgeServerId,
+                    captured_at: { [Op.between]: [startDate, endDate] },
+                }
+            }
+
+            const res = await SensorDataEntity.findAll({
+                where: q1,
+            })
+
+            return new Response()
+                .setStatus(true)
+                .setStatusCode(OperationStatus.success)
+                .setMessage("ok")
+                .setData(res)
+
+        } catch (error: any) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.repoError)
+                .setMessage(error)
+        }
+    }
+
+    async storeSensorData(data: any[]): Promise<IResponse> {
+
+        try {
+            const res = await SensorDataEntity.bulkCreate(data)
+            return new Response()
+                .setStatus(true)
+                .setStatusCode(OperationStatus.success)
+                .setMessage("ok")
+                .setData(res)
+        } catch (error: any) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.repoError)
+                .setMessage(error)
+        }
+    }
 
     async getMqttConfig(edgeServerId: number): Promise<IResponse> {
         try {

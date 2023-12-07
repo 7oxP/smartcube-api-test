@@ -22,7 +22,7 @@ class NotificationService implements INotificationService {
 
     constructor(
         userRepo: IUserRepository,
-        notifRepo: INotificationRepositories, 
+        notifRepo: INotificationRepositories,
         cloudMessageService: ICloudMessagingService,
         cloudStorageService: IStorageService,
         emailService: IEmailService
@@ -33,18 +33,30 @@ class NotificationService implements INotificationService {
         this.userRepo = userRepo
         this.emailService = emailService
     }
-
-    storeNotification(authGuard: IAuthGuard, file: IUploadedFile, title: string, description: string): Promise<IResponse> {
+    storeNotification(
+        authGuard: IAuthGuard,
+        file: IUploadedFile | null,
+        deviceId: number,
+        deviceType: string,
+        objectLabel: string,
+        riskLevel: string,
+        title: string,
+        description: string
+    ): Promise<IResponse> {
         return storeNotification(
             authGuard,
             this.notifRepo,
-            this.userRepo, 
-            this.cloudMessageService, 
+            this.userRepo,
+            this.cloudMessageService,
             this.cloudStorageService,
             file,
+            deviceId,
+            deviceType,
+            objectLabel,
+            riskLevel,
             title,
             description
-            )
+        )
     }
 
     viewNotification(authGuard: IAuthGuard, id: number, edgeServerId: number): Promise<IResponse> {

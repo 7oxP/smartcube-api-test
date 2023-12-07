@@ -41,4 +41,7 @@ export const OperationStatus = {
 
     //notification
     invalidEdgeToken: -122,
+
+    //
+    invalidDateRange: -133
 }

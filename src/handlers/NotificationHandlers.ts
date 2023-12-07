@@ -23,7 +23,11 @@ class NotificationHandlers {
             const result = await checkSchema({
                 // image: { notEmpty: true,  },
                 title: { notEmpty: true, },
-                description: { notEmpty: true, }
+                description: { notEmpty: true, },
+                device_id: { notEmpty: true, },
+                device_type: { notEmpty: true, },
+                object_label: { notEmpty: true, },
+                risk_level: { notEmpty: true, }, 
             }).run(req);
 
             for (const validation of result) {
@@ -38,24 +42,34 @@ class NotificationHandlers {
             }
 
             //temporary validate image files
-            if (req.files == null && req.files == undefined) {
-                res.status(400)
-                return res.json((new Response())
-                    .setStatus(false)
-                    .setStatusCode(OperationStatus.fieldValidationError)
-                    .setMessage(`invalid on field image`)
-                )
-            }
+            // if (req.files == null && req.files == undefined) {
+            //     res.status(400)
+            //     return res.json((new Response())
+            //         .setStatus(false)
+            //         .setStatusCode(OperationStatus.fieldValidationError)
+            //         .setMessage(`invalid on field image`)
+            //     )
+            // }
 
-            const file = req.files!.image as UploadedFile
+            let uploadedFile: IUploadedFile | null = null;
 
-            if (!(['image/png', 'image/jpg', 'image/jpeg'].includes(file.mimetype))) {
-                res.status(400)
-                return res.json((new Response())
-                    .setStatus(false)
-                    .setStatusCode(OperationStatus.fieldValidationError)
-                    .setMessage(`invalid on field image`)
-                )
+            if (req.files != null) {
+                const file = req.files!.image as UploadedFile
+                if (!(['image/png', 'image/jpg', 'image/jpeg'].includes(file.mimetype))) {
+                    res.status(400)
+                    return res.json((new Response())
+                        .setStatus(false)
+                        .setStatusCode(OperationStatus.fieldValidationError)
+                        .setMessage(`invalid on field image`)
+                    )
+                }
+
+                //3. parsing file multipart/form-data
+                uploadedFile = {
+                    buffer: file.data,
+                    originalname: file.name,
+                    mimetype: file.mimetype
+                }
             }
 
             //1. extract jwt
@@ -65,20 +79,17 @@ class NotificationHandlers {
             //2. build authGuard
             const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getData().edgeServerId)
 
-            //3. parsing file multipart/form-data
-
-            const uploadedFile: IUploadedFile = {
-                buffer: file.data,
-                originalname: file.name,
-                mimetype: file.mimetype
-            }
-
             //4. execute
             const notifResponse = await this.notificationService.storeNotification(
                 authGuard,
                 uploadedFile,
+                req.body.device_id,
+                req.body.device_type,
+                req.body.object_label,
+                req.body.risk_level,
                 req.body.title,
-                req.body.description)
+                req.body.description
+            )
 
             if (notifResponse.isFailed()) {
                 res.status(400)
@@ -92,7 +103,7 @@ class NotificationHandlers {
             return res.json((new Response())
                 .setStatus(false)
                 .setStatusCode(OperationStatus.fieldValidationError)
-                .setMessage(error)
+                .setMessage(error.toString())
             )
         }
 

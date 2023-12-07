@@ -26,13 +26,29 @@ module.exports = {
           key: 'id',
         },
       },
+      device_id: {
+        type: Sequelize.DataTypes.BIGINT.UNSIGNED,
+        allowNull: false,
+      },
+      device_type: {
+        type: Sequelize.DataTypes.STRING,
+        allowNull: false,
+      },
+      object_label: {
+        type: Sequelize.DataTypes.STRING,
+        allowNull: true,
+      },
+      risk_level: {
+        type: Sequelize.DataTypes.STRING,
+        allowNull: true,
+      },
       title: {
         type: Sequelize.DataTypes.CHAR(255),
         allowNull: false,
       },
       image: {
         type: Sequelize.DataTypes.TEXT,
-        allowNull: false,
+        allowNull: true,
       },
       description: {
         type: Sequelize.DataTypes.TEXT,

@@ -1,7 +1,7 @@
 import { OperationStatus } from "../../constants/operations"
 import { IAuthGuard, UserRoles } from '../../contracts/middleware/AuthGuard';
 import { IEdgeServerRepository } from '@/contracts/repositories/IEdgeServerRepository';
-import { IEdgeServerService } from '@/contracts/usecases/IEdgeServerService'
+import { IEdgeServerService, SensorData } from '@/contracts/usecases/IEdgeServerService'
 import { IResponse } from '../../contracts/usecases/IResponse';
 import { IJWTUtil } from '@/contracts/utils/IJWTUtil';
 import { Response } from '../../utils/Response';
@@ -32,6 +32,36 @@ class EdgeServerService implements IEdgeServerService {
         this.edgeServerRepo = edgeServerRepo
         this.mqttService = mqttService
         this.userService = userService
+    }
+
+    async storeSensorData(authGuard: IAuthGuard, deviceId: number, sensorData: SensorData[]): Promise<IResponse> {
+        if (authGuard.getEdgeServerId() == 0 || authGuard.getEdgeServerId() == undefined) {
+            return new Response()
+                .setMessage("invalid edge token")
+                .setStatusCode(OperationStatus.invalidEdgeToken)
+                .setStatus(false)
+        }
+
+        // console.log(sensorData)
+        sensorData.map((val, i, data) => {
+            data[i].edge_server_id = authGuard.getEdgeServerId()
+        })
+        
+        const res = await this.edgeServerRepo.storeSensorData(sensorData)
+        return res
+    }   
+
+    async readSensorDataByDevice(authGuard: IAuthGuard, edgeServerId: number, deviceId: number, startDate: string, endDate: string): Promise<IResponse> {
+        
+        //1. fetch user group
+        const userGroupResp = await this.userService.getUserGroupStatus(authGuard, edgeServerId)
+        if(userGroupResp.isFailed()) return userGroupResp
+
+        const startDateConf = new Date(startDate)
+        const endDateConf = new Date(endDate)
+        const res = await this.edgeServerRepo.readSensorData(edgeServerId, deviceId, startDateConf, endDateConf)
+
+        return res
     }
 
     async createEdgeMemberInvitation(authGuard: IAuthGuard, edgeSeverId: number): Promise<IResponse> {
@@ -250,6 +280,7 @@ class EdgeServerService implements IEdgeServerService {
             const devices: DeviceEntity[] = (devicesResp.getData() != null ? devicesResp.getData().devices : [])
 
             const devicesConfig: {
+                device_id: any;
                 type: any;
                 source_type: any;
                 source_address: any;
@@ -260,6 +291,7 @@ class EdgeServerService implements IEdgeServerService {
 
             devices.forEach((device) => {
                 devicesConfig.push({
+                    device_id: device.getDataValue('id'),
                     type: device.getDataValue('type'),
                     source_type: device.getDataValue('source_type'),
                     source_address: device.getDataValue('source_address'),
