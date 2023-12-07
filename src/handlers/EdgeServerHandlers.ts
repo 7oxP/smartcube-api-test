@@ -5,6 +5,7 @@ import { OperationStatus } from '../constants/operations'
 import { AuthGuard } from '../middleware/AuthGuard'
 import { IEdgeServerService } from '@/contracts/usecases/IEdgeServerService'
 import { UserRoles } from '../contracts/middleware/AuthGuard'
+import moment from 'moment'
 
 export class EdgeServerHandlers {
 
@@ -77,8 +78,7 @@ export class EdgeServerHandlers {
                 vendor_number: { notEmpty: true, },
                 type: { notEmpty: true, },
                 source_type: { notEmpty: true, },
-                dev_source_id: {},
-                rtsp_source_address: {},
+                source_address: { notEmpty: true },
                 assigned_model_type: { notEmpty: true, },
                 assigned_model_index: { notEmpty: true, },
                 additional_info: {},
@@ -109,8 +109,7 @@ export class EdgeServerHandlers {
                 req.body.vendor_number,
                 req.body.type,
                 req.body.source_type,
-                req.body.dev_source_id,
-                req.body.rtsp_source_address,
+                req.body.source_address,
                 req.body.assigned_model_type,
                 req.body.assigned_model_index,
                 req.body.additional_info,
@@ -142,8 +141,7 @@ export class EdgeServerHandlers {
                 vendor_number: { notEmpty: true, },
                 type: { notEmpty: true, },
                 source_type: { notEmpty: true, },
-                dev_source_id: {},
-                rtsp_source_address: {},
+                source_address: { notEmpty: true },
                 assigned_model_type: { notEmpty: true, },
                 assigned_model_index: { notEmpty: true, },
                 additional_info: {},
@@ -193,8 +191,7 @@ export class EdgeServerHandlers {
                 req.body.vendor_number,
                 req.body.type,
                 req.body.source_type,
-                req.body.dev_source_id,
-                req.body.rtsp_source_address,
+                req.body.source_address,
                 req.body.assigned_model_type,
                 req.body.assigned_model_index,
                 req.body.additional_info,
@@ -509,5 +506,171 @@ export class EdgeServerHandlers {
             )
         }
 
+    }
+
+    async storeSensorData(req: ExpressRequest, res: ExpressResponse) {
+        try {
+
+            //0. validate request
+            const result = await checkSchema({
+                device_id: { notEmpty: true, isNumeric: true },
+            }, ['params']).run(req);
+
+            for (const validation of result) {
+                if (!validation.isEmpty()) {
+                    res.status(400)
+                    return res.json((new Response())
+                        .setStatus(false)
+                        .setStatusCode(OperationStatus.fieldValidationError)
+                        .setMessage(`${validation.array()[0].msg} on param ${validation.context.fields[0]}`)
+                    )
+                }
+            }
+
+            //0.1 validate request
+            const validation1 = await checkSchema({
+                data: {
+                    isArray: {
+                        bail: true,
+                        options: {
+                            min: 0
+                        },
+                    }
+                },
+                "data.*.edge_server_id": {
+                    isInt: true,
+                },
+                "data.*.device_id": {
+                    isInt: true,
+                },
+                "data.*.inference_label_status": {
+                    isString: true,
+                },
+                "data.*.captured_at": {
+                    isDate: true
+                },
+                "data.*.data_measured": {
+                    isArray: {
+                        bail: true,
+                        options: {
+                            min: 1
+                        },
+                    }
+                },
+                "data.*.data_measured.*.sensor_type": {
+                    isString: true,
+                },
+                "data.*.data_measured.*.data": {
+                    isInt: true,
+                },
+                "data.*.data_measured.*.unit_measure": {
+                    isString: true,
+                }
+            }).run(req);
+
+            for (const validation of validation1) {
+                if (!validation.isEmpty()) {
+                    res.status(400)
+                    return res.json((new Response())
+                        .setStatus(false)
+                        .setStatusCode(OperationStatus.fieldValidationError)
+                        .setMessage(`${validation.array()[0].msg} on field ${validation.context.fields[0]}`)
+                    )
+                }
+            }
+
+            //1. extract jwt
+            const userData = (req as any).user
+
+            //2. build authGuard
+            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getData().edgeServerId)
+
+            //3. execute
+            const deviceId = parseInt(req.params.device_id)
+            const storeRes = await this.edgeServerService.storeSensorData(authGuard, deviceId, req.body.data)
+
+            if (storeRes.isFailed()) {
+                res.status(400)
+                return res.json(storeRes)
+            }
+
+            return res.json(storeRes)
+
+        } catch (error: any) {
+            res.status(400)
+            return res.json((new Response())
+                .setStatus(false)
+                .setStatusCode(OperationStatus.fieldValidationError)
+                .setMessage(error)
+            )
+        }
+    }
+
+    async readSensorDataByDevice(req: ExpressRequest, res: ExpressResponse) {
+        try {
+            
+            //0. validate request
+            const result = await checkSchema({
+                edge_server_id: { notEmpty: true, isNumeric: true },
+                device_id: { notEmpty: true, isNumeric: true },
+            }, ['params']).run(req);
+
+            for (const validation of result) {
+                if (!validation.isEmpty()) {
+                    res.status(400)
+                    return res.json((new Response())
+                        .setStatus(false)
+                        .setStatusCode(OperationStatus.fieldValidationError)
+                        .setMessage(`${validation.array()[0].msg} on param ${validation.context.fields[0]}`)
+                    )
+                }
+            }
+
+            //0. validate request
+            const queryValidation = await checkSchema({
+                start_date: { isDate: true },
+                end_date: { isDate: true },
+            }, ['query']).run(req);
+
+            for (const validation of queryValidation) {
+                if (!validation.isEmpty()) {
+                    res.status(400)
+                    return res.json((new Response())
+                        .setStatus(false)
+                        .setStatusCode(OperationStatus.fieldValidationError)
+                        .setMessage(`${validation.array()[0].msg} on query ${validation.context.fields[0]}`)
+                    )
+                }
+            }
+
+
+            //1. extract jwt
+            const userData = (req as any).user
+
+            //2. build authGuard
+            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getData().edgeServerId)
+
+            //3. execute
+            const edgeServerId = parseInt(req.params.edge_server_id)
+            const deviceId = parseInt(req.params.device_id)
+            const startDate = req.query.start_date == undefined ? moment().subtract(1, 'days').toDate().toString() : String(req.query.start_date)
+            const endDate = req.query.end_date == undefined ? moment().add(1, 'days').toDate().toString() : String(req.query.end_date)
+            const dataRes = await this.edgeServerService.readSensorDataByDevice(authGuard, edgeServerId, deviceId, startDate, endDate)
+
+            if (dataRes.isFailed()) {
+                res.status(400)
+                return res.json(dataRes)
+            }
+
+            return res.json(dataRes)
+            
+        } catch (error: any) {
+            res.status(400)
+            return res.json((new Response())
+                .setStatus(false)
+                .setStatusCode(OperationStatus.fieldValidationError)
+                .setMessage(error)
+            )
+        }
     }
 }

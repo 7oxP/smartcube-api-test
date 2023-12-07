@@ -26,13 +26,29 @@ NotificationEntity.init({
           key: 'id'
         }
     },
+    device_id: {
+        type: DataTypes.BIGINT.UNSIGNED,
+        allowNull: false,
+    },
+    device_type: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    object_label: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    risk_level: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
     title: {
         type: DataTypes.CHAR(255),
         allowNull: false,
     },  
     image: {
         type: DataTypes.TEXT,
-        allowNull: false,
+        allowNull: true,
     },
     description: {
         type: DataTypes.TEXT,

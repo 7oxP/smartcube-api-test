@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import assert from "assert";
 import { Database } from "../../src/database/db";
 import { IEdgeServerRepository } from "../../src/contracts/repositories/IEdgeServerRepository"
-import { IEdgeServerService } from "../../src/contracts/usecases/IEdgeServerService"
+import { IEdgeServerService, SensorData } from "../../src/contracts/usecases/IEdgeServerService"
 import { EdgeServerRepository } from "../../src/repositories/EdgeServerRepository"
 import { EdgeServerService } from "../../src/usecases/edgeServer/EdgeServerService"
 import { IUserRepository } from "../../src/contracts/repositories/IUserRepository"
@@ -78,6 +78,7 @@ afterAll(async () => {
     await db.getConnection().query("DELETE FROM user_groups WHERE user_id in (10002, 20002)")
     await db.getConnection().query("DELETE FROM edge_servers WHERE name in ('server 1', 'server 2')")
     await db.getConnection().query("DELETE FROM users WHERE id in (10002, 20002)")
+    await db.getConnection().query("DELETE FROM sensor_data")
     await db.getConnection().query("DELETE FROM devices")
 })
 
@@ -162,7 +163,6 @@ describe("add device", () => {
             "123",
             "camera",
             "rtsp",
-            "",
             "rtsp://localhost:5666",
             0,
             0,
@@ -189,7 +189,6 @@ describe("add device", () => {
             "123",
             "motorcycle",
             "rtsp",
-            "",
             "rtsp://localhost:5666",
             0,
             0,
@@ -215,7 +214,6 @@ describe("add device", () => {
             "123",
             "camera",
             "mqtt",
-            "",
             "rtsp://localhost:5666",
             0,
             0,
@@ -255,6 +253,7 @@ describe("fetch devices", () => {
         // console.log(res)
         assert.equal(res.getStatusCode(), OperationStatus.success)
         assert.equal(res.getData().length, 1)
+        assert.notEqual(res.getData()[0].source_address, null)
     })
 
     it("devices not found", async () => {
@@ -292,7 +291,6 @@ describe("update device", () => {
             "PDIP-2034",
             "camera",
             "rtsp",
-            "",
             "rtsp://localhost:5666",
             0,
             0,
@@ -322,7 +320,6 @@ describe("update device", () => {
             "PDIP-2034",
             "motorcycle",
             "rtsp",
-            "",
             "rtsp://localhost:5666",
             0,
             0,
@@ -351,7 +348,6 @@ describe("update device", () => {
             "PDIP-2034",
             "camera",
             "mqtt",
-            "",
             "rtsp://localhost:5666",
             0,
             0,
@@ -366,7 +362,7 @@ describe("update device", () => {
 
 describe("create invitation member", () => {
 
-    it("unauthorized due to user is not a part of user group", async () => {
+    it("unauthorized due to user is not part of user group", async () => {
 
         const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
         const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
@@ -457,5 +453,98 @@ describe("join invitation member", () => {
         assert.equal(res.getStatus(), false)
         assert.equal(res.getStatusCode(), OperationStatus.invitationCodeInvalid)
         assert.equal(res.getData(), null)
+    })
+})
+
+describe("store sensor data", () => {
+
+    it("failed invalid edge token", async () => {
+
+        const authGuard = new AuthGuard(20002, "iyan@mail.com", "iyan", UserRoles.Admin);
+
+        const data: SensorData[] = [{
+            edge_server_id: 0,
+            device_id: 0,
+            data_measured: "{}",
+            inference_label_status: "",
+            captured_at: new Date()
+        }]
+
+        const res = await edgeServerService.storeSensorData(
+            authGuard,
+            0,
+            data,
+        )
+
+        assert.equal(res.getStatus(), false)
+        assert.equal(res.getStatusCode(), OperationStatus.invalidEdgeToken)
+        assert.equal(res.getData(), null)
+    })
+
+    it("success", async () => {
+
+        const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
+
+        const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
+
+        const authGuard2 = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin, edgeRes.getData()[0].id);
+
+        const devicesRes = await edgeServerService.fetchDevices(authGuard2, edgeRes.getData()[0].id)
+
+        const data: SensorData[] = [{
+            edge_server_id: edgeRes.getData()[0].id,
+            device_id: devicesRes.getData().devices[0].id,
+            data_measured: "{}",
+            inference_label_status: "danger",
+            captured_at: new Date("2022-01-01")
+        }]
+
+        const res = await edgeServerService.storeSensorData(
+            authGuard2,
+            1,
+            data,
+        )
+
+        // console.log(res)
+        assert.equal(res.getStatus(), true)
+        assert.equal(res.getStatusCode(), OperationStatus.success)
+        assert.equal(res.getData().length, 1)
+    })
+})
+
+describe("read sensor data", () => {
+
+    it("failed due to user is not part of edge server user group", async () => {
+
+        const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
+        const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
+
+        const authGuard2 = new AuthGuard(10001, "iyan@mai.com", "iyan", UserRoles.Admin);
+
+        const res = await edgeServerService.readSensorDataByDevice(authGuard2, edgeRes.getData()[0].id, 1, "2021-12-20", "2022-01-05")
+
+        assert.equal(res.getStatus(), false)
+        assert.equal(res.getStatusCode(), OperationStatus.unauthorizedAccess)
+        assert.equal(res.getData(), null)
+    })
+
+    it("success", async () => {
+
+        const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
+
+        const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
+
+        const authGuard2 = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin, edgeRes.getData()[0].id);
+
+        const devicesRes = await edgeServerService.fetchDevices(authGuard2, edgeRes.getData()[0].id)
+
+        const res = await edgeServerService.readSensorDataByDevice(authGuard2, edgeRes.getData()[0].id, devicesRes.getData().devices[0].id, "2021-12-20", "2022-01-05")
+
+        // console.log(res)
+        assert.equal(res.getStatus(), true)
+        assert.equal(res.getStatusCode(), OperationStatus.success)
+        assert.notEqual(res.getData(), null)
+        assert.equal(res.getData().length, 1)
+        // assert.equal(res.getData()[0].unit_measure, "ph")
     })
 })

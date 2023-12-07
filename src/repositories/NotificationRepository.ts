@@ -9,12 +9,26 @@ import EdgeServerEntity from "../entities/EdgeServer";
 
 class NotificationRepository implements INotificationRepositories {
 
-    async storeNotification(userId: number, edgeServerId: number, title: string, description: string, imageUrl: string): Promise<IResponse> {
+    async storeNotification(
+        userId: number, 
+        edgeServerId: number, 
+        deviceId: number,
+        deviceType: string,
+        objectLabel: string,
+        riskLevel: string, 
+        title: string, 
+        description: string, 
+        imageUrl: string | null
+    ): Promise<IResponse> {
 
         try {
             const newNotif = await NotificationEntity.create({
                 user_id: userId,
                 edge_server_id: edgeServerId,
+                device_id: deviceId,
+                device_type: deviceType,
+                object_label: objectLabel,
+                risk_level: riskLevel,
                 title: title,
                 image: imageUrl,
                 description: description,

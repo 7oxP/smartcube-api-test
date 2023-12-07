@@ -61,6 +61,8 @@ export function runHttpHandlers(
     app.post('/edge-device-start', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.startDevice(req, res))
     app.get('/edge-server-user-invite/:edge_server_id', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.createEdgeMemberInvitation(req, res))
     app.post('/edge-server-user-join', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.joinEdgeMemberInvitation(req, res))
+    app.post('/edge-device-sensor/:device_id', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.storeSensorData(req, res))
+    app.get('/edge-device-sensor/server/:edge_server_id/device/:device_id', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.readSensorDataByDevice(req, res))
 
     //User
     app.get('/user-profile', jwtMiddleware.authenticateToken, async (req:Request, res: Response) => userHandler.getUserProfile(req, res))

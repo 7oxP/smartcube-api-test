@@ -2,6 +2,14 @@ import "@/utils/Response"
 import { IResponse } from "./IResponse"
 import { IAuthGuard } from "../middleware/AuthGuard"
 
+export interface SensorData {
+    edge_server_id: number,
+    device_id: number,
+    data_measured: any,
+    inference_label_status: string,
+    captured_at: Date
+}
+
 export interface IEdgeServerService {
     addEdgeServer(
         authGuard: IAuthGuard,
@@ -17,8 +25,7 @@ export interface IEdgeServerService {
         vendorNumber: string,
         type: string,
         sourceType: string,
-        devSourceId: string,
-        rtspSourceAddress: string,
+        sourceAddress: string,
         assignedModelType: number,
         assignedModelIndex: number,
         additionalInfo: any
@@ -37,8 +44,7 @@ export interface IEdgeServerService {
         vendorNumber: string,
         type: string,
         sourceType: string,
-        devSourceId: string,
-        rtspSourceAddress: string,
+        sourceAddress: string,
         assignedModelType: number,
         assignedModelIndex: number,
         additionalInfo: any
@@ -48,4 +54,6 @@ export interface IEdgeServerService {
     generateEdgeServerConfig(authGuard: IAuthGuard): IResponse
     createEdgeMemberInvitation(authGuard: IAuthGuard, edgeSeverId: number): Promise<IResponse>
     joinEdgeMemberInvitation(authGuard: IAuthGuard, invitationCode: string): Promise<IResponse>
+    storeSensorData(authGuard: IAuthGuard, deviceId: number, sensorData: SensorData[]): Promise<IResponse>
+    readSensorDataByDevice(authGuard: IAuthGuard, edgeServerId: number, deviceId: number, startDate: string, endData: string): Promise<IResponse>
 }
