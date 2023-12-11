@@ -4,7 +4,7 @@ import { IResponse } from "../usecases/IResponse";
 export interface IUserRepository {
     findByEmail(email: string): Promise<IResponse>
     findByEmailNoPassword(email: string): Promise<IResponse>
-    store(username: string, email: string, password: string, code: string): Promise<IResponse>
+    store(username: string, email: string, password: string, code: string, fcmRegistrationToken: string): Promise<IResponse>
     findByVerificationCode(email: string, code: string): Promise<IResponse>
     updateVerificationStatus(email: string, status: boolean): Promise<IResponse>
     fetchUserByGroup(userId: number, edgeServerId: number): Promise<IResponse>
@@ -14,4 +14,5 @@ export interface IUserRepository {
     updateProfile(email: string, avatarUrl: string): Promise<IResponse>
     findById(id: number): Promise<IResponse>
     getUserGroupStatus(userId: number, edgeServerId: number): Promise<IResponse>
+    updateFcmRegistrationToken(email: string, fcmRegistrationToken: string): Promise<IResponse>
 }
