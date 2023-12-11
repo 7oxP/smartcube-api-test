@@ -94,7 +94,8 @@ class AuthService implements IAuthService {
         username: string,
         email: string,
         password: string,
-        cPassword: string
+        cPassword: string,
+        fcmRegistrationToken: string
     ): Promise<IResponse> {
         try {
             const userResponse = await this.userRepo.findByEmail(email)
@@ -120,7 +121,8 @@ class AuthService implements IAuthService {
                 username,
                 email,
                 hashPassword.data,
-                verificationCode
+                verificationCode,
+                fcmRegistrationToken
             )
 
             const sendVerificationCode =

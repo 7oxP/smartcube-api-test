@@ -68,6 +68,7 @@ export function runHttpHandlers(
     //User
     app.get('/user-profile', jwtMiddleware.authenticateToken, async (req:Request, res: Response) => userHandler.getUserProfile(req, res))
     app.put('/user-profile/:id', jwtMiddleware.authenticateToken, async (req:Request, res: Response) => userHandler.updateUserProfile(req, res))
+    app.patch('/user-profile/fcm', jwtMiddleware.authenticateToken, async (req:Request, res: Response) => userHandler.updateFcmRegistrationToken(req, res))
 
     //Listening 
     app.listen(port, () => {

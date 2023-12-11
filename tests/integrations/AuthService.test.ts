@@ -142,8 +142,10 @@ describe("sign up", () => {
     const email = "iyan@mail.com"
     const password = "pass123"
     const cPassword = "pass123"
+    const fcmRegistrationToken = "123123"
 
-    const res = await authService.signUp(username, email, password, cPassword)
+
+    const res = await authService.signUp(username, email, password, cPassword, fcmRegistrationToken)
 
     //assert
     assert.equal(res.getStatus(), false)
@@ -155,8 +157,10 @@ describe("sign up", () => {
     const email = "iyan2@mail.com"
     const password = "pass123"
     const cPassword = "pass1232"
+    const fcmRegistrationToken = "123123"
 
-    const res = await authService.signUp(username, email, password, cPassword)
+
+    const res = await authService.signUp(username, email, password, cPassword, fcmRegistrationToken)
 
     //assert
     assert.equal(res.getStatus(), false)
@@ -168,8 +172,9 @@ describe("sign up", () => {
     const email = "pras@mail.com"
     const password = "pass123"
     const cPassword = "pass123"
+    const fcmRegistrationToken = "123123"
 
-    const res = await authService.signUp(username, email, password, cPassword)
+    const res = await authService.signUp(username, email, password, cPassword, fcmRegistrationToken)
 
     //assert
     assert.equal(res.getStatus(), true)

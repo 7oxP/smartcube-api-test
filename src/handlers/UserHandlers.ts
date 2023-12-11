@@ -29,7 +29,9 @@ class UserHandlers {
                 userData.getData().edgeServerId
             )
 
-            const fetchResponse = await this.userService.getUserProfile(authGuard)
+            const fetchResponse = await this.userService.getUserProfile(
+                authGuard
+            )
 
             //3. execute
             if (fetchResponse.isFailed()) {
@@ -49,22 +51,28 @@ class UserHandlers {
             //temporary validate image files
             if (req.files == null && req.files == undefined) {
                 res.status(400)
-                return res.json((new Response())
-                    .setStatus(false)
-                    .setStatusCode(OperationStatus.fieldValidationError)
-                    .setMessage(`invalid on field image`)
+                return res.json(
+                    new Response()
+                        .setStatus(false)
+                        .setStatusCode(OperationStatus.fieldValidationError)
+                        .setMessage(`invalid on field image`)
                 )
             }
 
             const file = req.files!.avatar as UploadedFile
 
-            if (!(['image/png', 'image/jpg', 'image/jpeg'].includes(file.mimetype))) {
+            if (
+                !["image/png", "image/jpg", "image/jpeg"].includes(
+                    file.mimetype
+                )
+            ) {
                 console.log("error image png")
                 res.status(400)
-                return res.json((new Response())
-                    .setStatus(false)
-                    .setStatusCode(OperationStatus.fieldValidationError)
-                    .setMessage(`invalid on field image`)
+                return res.json(
+                    new Response()
+                        .setStatus(false)
+                        .setStatusCode(OperationStatus.fieldValidationError)
+                        .setMessage(`invalid on field image`)
                 )
             }
 
@@ -72,20 +80,27 @@ class UserHandlers {
             const userData = (req as any).user
 
             //2. build authGuard
-            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getData().edgeServerId)
+            const authGuard = new AuthGuard(
+                userData.getData().userId,
+                userData.getData().email,
+                userData.getData().username,
+                UserRoles.Admin,
+                userData.getData().edgeServerId
+            )
 
             //3. parsing file multipart/form-data
 
             const uploadedFile: IUploadedFile = {
                 buffer: file.data,
                 originalname: file.name,
-                mimetype: file.mimetype
+                mimetype: file.mimetype,
             }
 
             //4. execute
             const updateResponse = await this.userService.updateUserProfile(
                 authGuard,
-                uploadedFile)
+                uploadedFile
+            )
 
             if (updateResponse.isFailed()) {
                 res.status(400)
@@ -93,16 +108,67 @@ class UserHandlers {
             }
 
             return res.json(updateResponse).status(200)
-
         } catch (error: any) {
             res.status(400)
-            return res.json((new Response())
-                .setStatus(false)
-                .setStatusCode(OperationStatus.fieldValidationError)
-                .setMessage(error)
+            return res.json(
+                new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.fieldValidationError)
+                    .setMessage(error)
             )
+        }
+    }
+
+    async updateFcmRegistrationToken(
+        req: ExpressRequest,
+        res: ExpressResponse
+    ) {
+        try {
+
+            //0. validate request
+            const result = await checkSchema({
+                fcm_registration_token: { notEmpty: true, }
+            }).run(req);
+
+            for (const validation of result) {
+                if (!validation.isEmpty()) {
+                    res.status(400)
+                    return res.json((new Response())
+                        .setStatus(false)
+                        .setStatusCode(OperationStatus.fieldValidationError)
+                        .setMessage(`${validation.array()[0].msg} on field ${validation.context.fields[0]}`)
+                    )
+                }
+            }
+
+            //1. extract jwt
+            const userData = (req as any).user
+
+            //2. build authGuard
+            const authGuard = new AuthGuard(
+                userData.getData().userId,
+                userData.getData().email,
+                userData.getData().username,
+                UserRoles.Admin,
+                userData.getData().edgeServerId
+            )
+            
+            //3. execute
+            const updateResponse =
+                await this.userService.updateFcmRegistrationToken(authGuard, req.body.fcm_registration_token)
+
+            if (updateResponse.isFailed()) {
+                res.status(400)
+                return res.json(updateResponse)
+            }
+
+            return res.json(updateResponse).status(200)
+        } catch (error: any) {
+            res.status(400)
+            return res.json({ error: error })
         }
     }
 }
 
 export { UserHandlers }
+
