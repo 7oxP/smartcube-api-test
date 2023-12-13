@@ -79,7 +79,7 @@ afterAll(async () => {
     await db.getConnection().query("DELETE FROM edge_servers WHERE name in ('server 1', 'server 2')")
     await db.getConnection().query("DELETE FROM users WHERE id in (10002, 20002)")
     await db.getConnection().query("DELETE FROM sensor_data")
-    await db.getConnection().query("DELETE FROM devices")
+    await db.getConnection().query("DELETE FROM devices WHERE vendor_name in ('vendor 1')")
 })
 
 describe("addEdgeServer", () => {
