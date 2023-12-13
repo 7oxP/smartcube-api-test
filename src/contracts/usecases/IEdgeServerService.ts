@@ -17,7 +17,7 @@ export interface IEdgeServerService {
         vendor: string,
         description: string,
     ): Promise<IResponse>
-
+    
     addDevice(
         authGuard: IAuthGuard,
         edgeServerID: number,
@@ -31,6 +31,12 @@ export interface IEdgeServerService {
         additionalInfo: any
     ): Promise<IResponse>
     
+    viewDevice(
+        authGuard: IAuthGuard,
+        edgeServerID: number,
+        deviceID: number,
+    ): Promise<IResponse>
+
     fetchEdgeServer(
         authGuard: IAuthGuard,
     ): Promise<IResponse>

@@ -63,6 +63,7 @@ export function runHttpHandlers(
     app.post('/edge-server-user-join', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.joinEdgeMemberInvitation(req, res))
     app.post('/edge-device-sensor/:device_id', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.storeSensorData(req, res))
     app.get('/edge-device-sensor/server/:edge_server_id/device/:device_id', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.readSensorDataByDevice(req, res))
+    app.get('/edge-device/:edge_server_id/view/:device_id', jwtMiddleware.authenticateToken, async (req: Request, res: Response) => edgeServerHandler.viewDevice(req, res))
 
     //User
     app.get('/user-profile', jwtMiddleware.authenticateToken, async (req:Request, res: Response) => userHandler.getUserProfile(req, res))

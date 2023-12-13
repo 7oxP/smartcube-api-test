@@ -163,7 +163,7 @@ class EdgeServerService implements IEdgeServerService {
             edgeServerId: res.getData().id
         }
 
-        const edgeAccessTokenRes = await this.jwtUtil.encode(edgeAccessTokenPayload, process.env.JWT_SECRET_KEY!, "168h")
+        const edgeAccessTokenRes = await this.jwtUtil.encode(edgeAccessTokenPayload, process.env.JWT_SECRET_KEY!, "9999y")
         if (edgeAccessTokenRes.isFailed()) return edgeAccessTokenRes
 
         return new Response()
@@ -254,6 +254,15 @@ class EdgeServerService implements IEdgeServerService {
         }
     }
 
+    async viewDevice(authGuard: IAuthGuard, edgeServerID: number, deviceID: number): Promise<IResponse> {
+        
+        //1. fetch user group
+        const userGroupResp = await this.userService.getUserGroupStatus(authGuard, edgeServerID)
+        if(userGroupResp.isFailed()) return userGroupResp
+
+        return this.edgeServerRepo.viewDevice(deviceID)
+    }
+
     async fetchEdgeServer(authGuard: IAuthGuard): Promise<IResponse> {
         return await this.edgeServerRepo.fetchEdge(authGuard.getUserId())
     }
@@ -282,6 +291,8 @@ class EdgeServerService implements IEdgeServerService {
 
             const devicesConfig: {
                 device_id: any;
+                device_vendor_name: any,
+                edge_server_name: any,
                 type: any;
                 source_type: any;
                 source_address: any;
@@ -293,6 +304,8 @@ class EdgeServerService implements IEdgeServerService {
             devices.forEach((device) => {
                 devicesConfig.push({
                     device_id: device.getDataValue('id'),
+                    device_vendor_name: device.getDataValue('vendor_name'),
+                    edge_server_name: devicesResp.getData().getDataValue('name'),
                     type: device.getDataValue('type'),
                     source_type: device.getDataValue('source_type'),
                     source_address: device.getDataValue('source_address'),
