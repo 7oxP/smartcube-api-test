@@ -9,6 +9,7 @@ import DeviceEntity from "../entities/DeviceEntity";
 import { Op } from "sequelize";
 import { db } from "../entities/BaseEntity";
 import SensorDataEntity from "../entities/SensorDataEntity";
+import NotificationEntity from "../entities/NotificationEntity";
 
 class EdgeServerRepository implements IEdgeServerRepository {
 
@@ -39,6 +40,9 @@ class EdgeServerRepository implements IEdgeServerRepository {
 
             const res = await SensorDataEntity.findAll({
                 where: q1,
+                order: [
+                    ['captured_at', 'DESC']
+                ]
             })
 
             return new Response()
@@ -122,6 +126,48 @@ class EdgeServerRepository implements IEdgeServerRepository {
                 .setStatusCode(OperationStatus.success)
                 .setMessage("ok")
                 .setData(res)
+
+        } catch (error: any) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.repoError)
+                .setMessage(error)
+        }
+    }
+
+    async viewDevice(deviceId: number): Promise<IResponse> {
+        try {
+            const data = await DeviceEntity.findOne({
+                where: { id: deviceId },
+                include: [
+                    {
+                        model: NotificationEntity,
+                        as: "notifications",
+                        required: false,
+                        right: false
+                    },
+                    {
+                        model: EdgeServerEntity,
+                        as: "edge_servers",
+                        required: true,
+                        right: true,
+                        attributes: ["id", "name", "vendor", "description"]
+                    }
+                ]
+            })
+
+            if (data == null) {
+                return new Response()
+                    .setStatus(false)
+                    .setStatusCode(OperationStatus.repoErrorModelNotFound)
+                    .setMessage("model not found!")
+            }
+
+            return new Response()
+                .setStatus(true)
+                .setStatusCode(OperationStatus.success)
+                .setMessage("ok")
+                .setData(data?.dataValues)
 
         } catch (error: any) {
             return new Response()

@@ -26,8 +26,8 @@ class NotificationHandlers {
                 description: { notEmpty: true, },
                 device_id: { notEmpty: true, },
                 device_type: { notEmpty: true, },
-                object_label: { notEmpty: true, },
-                risk_level: { notEmpty: true, }, 
+                // object_label: { notEmpty: true, },
+                // risk_level: { notEmpty: true, }, 
             }).run(req);
 
             for (const validation of result) {

@@ -270,6 +270,62 @@ describe("fetch devices", () => {
 
 })
 
+describe("view devices", () => {
+
+    it("failed due to user is not part of user group", async () => {
+
+        // Fetch edge server
+        const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
+        const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
+
+        // Fetch Edge Devices
+        const devicesRes = await edgeServerService.fetchDevices(authGuard, edgeRes.getData()[0].id)
+
+        // view device
+        const authGuard2 = new AuthGuard(10003, "iyan1003@mai.com", "iyan1003", UserRoles.Admin);
+        const res = await edgeServerService.viewDevice(authGuard2, edgeRes.getData()[0].id, devicesRes.getData().devices[0].id)
+
+        // console.log(res)
+        assert.equal(res.getStatusCode(), OperationStatus.unauthorizedAccess)
+        assert.equal(res.getData(), null)
+        assert.equal(res.getStatus(), false)
+    })
+
+    it("failed device not found", async () => {
+
+        // Fetch edge server
+        const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
+        const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
+
+        // view device
+        const res = await edgeServerService.viewDevice(authGuard, edgeRes.getData()[0].id, 100)
+
+        assert.equal(res.getStatusCode(), OperationStatus.repoErrorModelNotFound)
+        assert.equal(res.getData(), null)
+        assert.equal(res.getStatus(), false)
+    })
+
+    it("success", async () => {
+
+        // Fetch edge server
+        const authGuard = new AuthGuard(10002, "iyan@mai.com", "iyan", UserRoles.Admin);
+        const edgeRes = await edgeServerService.fetchEdgeServer(authGuard)
+
+        // Fetch Edge Devices
+        const devicesRes = await edgeServerService.fetchDevices(authGuard, edgeRes.getData()[0].id)
+
+        // view device
+        const res = await edgeServerService.viewDevice(authGuard, edgeRes.getData()[0].id, devicesRes.getData().devices[0].id)
+
+        // console.log(res)
+        assert.equal(res.getStatusCode(), OperationStatus.success)
+        assert.equal(res.getStatus(), true)
+        assert.notEqual(res.getData(), null)
+        assert.equal(res.getData().vendor_name, "vendor 1")
+        assert.equal(res.getData().notifications.length, 0)
+    })
+})
+
 describe("update device", () => {
 
     it("success", async () => {

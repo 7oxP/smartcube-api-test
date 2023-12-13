@@ -9,6 +9,8 @@ export interface IEdgeServerRepository {
 
     fetchDevice(userId: number, edgeServerId: number): Promise<IResponse>
 
+    viewDevice(deviceId: number): Promise<IResponse>
+
     storeEdge(
         userId: number,
         name: string,

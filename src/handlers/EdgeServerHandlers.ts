@@ -288,6 +288,58 @@ export class EdgeServerHandlers {
         }
     }
 
+    async viewDevice(req: ExpressRequest, res: ExpressResponse) {
+        try {
+            
+             //0. validate request
+             const result = await checkSchema({
+                edge_server_id: { notEmpty: true, isNumeric: true },
+            }, ['params']).run(req);
+
+            for (const validation of result) {
+                if (!validation.isEmpty()) {
+                    res.status(400)
+                    return res.json((new Response())
+                        .setStatus(false)
+                        .setStatusCode(OperationStatus.fieldValidationError)
+                        .setMessage(`${validation.array()[0].msg} on param ${validation.context.fields[0]}`)
+                    )
+                }
+            }
+
+            //1. extract jwt
+            const userData = (req as any).user
+
+            //2. build authGuard
+            const authGuard = new AuthGuard(userData.getData().userId, userData.getData().email, userData.getData().username, UserRoles.Admin, userData.getData().edgeServerId)
+
+            //3. invoke service
+            const edgeServerId = parseInt(req.params.edge_server_id)
+            const deviceId = parseInt(req.params.device_id)
+            const resp = await this.edgeServerService.viewDevice(authGuard, edgeServerId, deviceId)
+
+            switch (resp.getStatusCode()) {
+                case OperationStatus.success:
+                    return res.json(resp).status(200)
+                case OperationStatus.repoErrorModelNotFound:
+                    return res.json(resp).status(404)
+                case OperationStatus.unauthorizedAccess:
+                    return res.json(resp).status(403)
+                default:
+                    return res.json(resp).status(400)
+            }
+
+
+        } catch (error: any) {
+            res.status(400)
+            return res.json((new Response())
+                .setStatus(false)
+                .setStatusCode(OperationStatus.fieldValidationError)
+                .setMessage(error)
+            )
+        }
+    }
+
     async fetchDevicesConfig(req: ExpressRequest, res: ExpressResponse) {
         try {
             //1. extract jwt

@@ -64,6 +64,9 @@ EdgeServerEntity.hasMany(UserGroupEntity, {foreignKey: "edge_server_id", as: "us
 EdgeServerEntity.hasMany(NotificationEntity, {foreignKey: "edge_server_id"})
 NotificationEntity.belongsTo(EdgeServerEntity, {foreignKey: "edge_server_id"})
 
+DeviceEntity.hasMany(NotificationEntity, {foreignKey: "device_id", as: "notifications"})
+NotificationEntity.belongsTo(DeviceEntity, {foreignKey: "device_id"})
+
 EdgeServerEntity.belongsToMany(DeviceEntity, {through: DeviceEdgeServerEntity, as: "devices"})
 DeviceEntity.belongsToMany(EdgeServerEntity, {through: DeviceEdgeServerEntity, as: "edge_servers"})
 
