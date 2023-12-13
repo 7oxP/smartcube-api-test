@@ -85,49 +85,92 @@ describe("get user profile", () => {
         assert.ok(res.getStatus())
         assert.equal(res.getStatusCode(), OperationStatus.success)
     })
+})
 
-    describe("update avatar profile", () => {
-        it("failed update avatar profile due to unauthorized access", async () => {
-            //create auth guard
-            const authGuard = new AuthGuard(
-                0,
-                "iyan2@mail.com",
-                "iyan",
-                UserRoles.Admin,
-                10003
-            )
-            //execute usecase
-            const resp = await userService.updateUserProfile(authGuard, file)
+describe("update avatar profile", () => {
+    it("failed update avatar profile due to unauthorized access", async () => {
+        //create auth guard
+        const authGuard = new AuthGuard(
+            0,
+            "iyan2@mail.com",
+            "iyan",
+            UserRoles.Admin,
+            10003
+        )
+        //execute usecase
+        const resp = await userService.updateUserProfile(authGuard, file)
 
-            //assert
-            assert.equal(resp.getStatus(), false)
-            assert.equal(
-                OperationStatus.unauthorizedAccess,
-                resp.getStatusCode()
-            )
-        })
+        //assert
+        assert.equal(resp.getStatus(), false)
+        assert.equal(
+            OperationStatus.unauthorizedAccess,
+            resp.getStatusCode()
+        )
+    })
 
-        it("update avatar profile successfully", async () => {
-            //create auth guard
-            const authGuard = new AuthGuard(
-                10003,
-                "iyan@mail.com",
-                "iyan",
-                UserRoles.Admin,
-                10003
-            )
+    it("update avatar profile successfully", async () => {
+        //create auth guard
+        const authGuard = new AuthGuard(
+            10003,
+            "iyan@mail.com",
+            "iyan",
+            UserRoles.Admin,
+            10003
+        )
 
-            //execute usecase
-            const res = await userService.updateUserProfile(
-                authGuard,
-                file
-            )
+        //execute usecase
+        const res = await userService.updateUserProfile(
+            authGuard,
+            file
+        )
 
-            console.log(res)
-            //assert
-            assert.ok(res.getStatus())
-            assert.equal(res.getStatusCode(), OperationStatus.success)
-        })
+        console.log(res)
+        //assert
+        assert.ok(res.getStatus())
+        assert.equal(res.getStatusCode(), OperationStatus.success)
     })
 })
 
+describe("update user fcm registration token", () => {
+    it("failed update user fcm registration token due to unauthorized access", async () => {
+        //create auth guard
+        const authGuard = new AuthGuard(
+            0,
+            "iyan2@mail.com",
+            "iyan",
+            UserRoles.Admin,
+            10003
+        )
+        //execute usecase
+        const resp = await userService.updateFcmRegistrationToken(authGuard, "12312")
+
+        //assert
+        assert.equal(resp.getStatus(), false)
+        assert.equal(
+            OperationStatus.unauthorizedAccess,
+            resp.getStatusCode()
+        )
+    })
+
+    it("update user fcm registration token successfully", async () => {
+        //create auth guard
+        const authGuard = new AuthGuard(
+            10003,
+            "iyan@mail.com",
+            "iyan",
+            UserRoles.Admin,
+            10003
+        )
+
+        //execute usecase
+        const res = await userService.updateFcmRegistrationToken(
+            authGuard,
+            "123123"
+        )
+
+        console.log(res)
+        //assert
+        assert.ok(res.getStatus())
+        assert.equal(res.getStatusCode(), OperationStatus.success)
+    })
+})

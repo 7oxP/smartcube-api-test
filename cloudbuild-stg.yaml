@@ -27,7 +27,7 @@ steps:
     args:
       - storage
       - cp
-      - gs://mqtt-certificate/mqtt-ssl.crt
+      - gs://smartcube-mqtt-cert/mqtt-ssl.crt
       - .
   - name: gcr.io/cloud-builders/docker
     args:

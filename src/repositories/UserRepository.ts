@@ -90,7 +90,8 @@ class UserRepository implements IUserRepository {
         username: string,
         email: string,
         password: string,
-        code: string
+        code: string,
+        fcmRegistrationToken: string
     ): Promise<IResponse> {
         try {
             const user = await UserEntity.create({
@@ -99,6 +100,7 @@ class UserRepository implements IUserRepository {
                 password: password,
                 is_verified: 0,
                 verification_code: code,
+                fcm_registration_token:fcmRegistrationToken,
                 created_at: this.formattedTime,
             })
 
@@ -374,6 +376,38 @@ class UserRepository implements IUserRepository {
                 .setStatusCode(OperationStatus.success)
                 .setMessage("ok")
                 .setData(user)
+        } catch (error: any) {
+            return new Response()
+                .setStatus(false)
+                .setStatusCode(OperationStatus.repoError)
+                .setMessage(error)
+                .setData({})
+        }
+    }
+
+    async updateFcmRegistrationToken(email: string, fcmRegistrationToken: string): Promise<IResponse>{
+        try {
+            const updateUser = await UserEntity.update(
+                { fcm_registration_token: fcmRegistrationToken, updated_at: this.formattedTime },
+                { where: { email: email } }
+            )
+
+            console.log("updateUser",updateUser)
+
+            if (updateUser[0] === 0) {
+                return new Response()
+                    .setStatus(true)
+                    .setStatusCode(OperationStatus.unauthorizedAccess)
+                    .setMessage("Update Gagal, User Unauthorized")
+                    .setData(null)
+            }
+
+            return new Response()
+                .setStatus(true)
+                .setStatusCode(OperationStatus.success)
+                .setMessage("ok")
+                .setData(null)
+
         } catch (error: any) {
             return new Response()
                 .setStatus(false)

@@ -41,7 +41,8 @@ export class AuthHandlers {
                 req.body.username,
                 req.body.email,
                 req.body.password,
-                req.body.cPassword
+                req.body.cPassword,
+                req.body.fcmRegistrationToken
             )
 
             if (signUpResponse.isFailed()) {

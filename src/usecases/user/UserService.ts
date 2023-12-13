@@ -8,6 +8,7 @@ import { getUserProfile } from "./GetUserProfile"
 import { getUserGroupStatus } from "./GetUserGroupStatus"
 import { addUserGroup } from "./AddUserGroup"
 import { updateUserProfile } from "./UpdateUserProfile"
+import { updateFcmRegistrationToken } from "./UpdateFcmRegistrationToken";
 
 class UserService implements IUserService {
     userRepo: IUserRepository
@@ -32,6 +33,10 @@ class UserService implements IUserService {
     
     async updateUserProfile(authGuard: IAuthGuard, file: IUploadedFile): Promise<IResponse> {
         return updateUserProfile(authGuard, this.userRepo, this.storageService, file)
+    }
+
+    async updateFcmRegistrationToken(authGuard: IAuthGuard, fcmRegistrationToken: string): Promise<IResponse> {
+        return updateFcmRegistrationToken(authGuard, this.userRepo, fcmRegistrationToken)
     }
 }
 
