@@ -66,6 +66,8 @@ steps:
           - "--max-instances"
           - "3"
           - "--allow-unauthenticated"
+          - "--vpc-connector"
+          - "${_VPC_CONNECTOR_NAME}"
           - "--update-secrets"
           - APP_ENV=APP_ENV:latest
           - "--update-secrets"
@@ -75,11 +77,11 @@ steps:
           - "--update-secrets"
           - DB_DIALECT=DB_DIALECT:latest
           - "--update-secrets"
-          - DB_HOST=DB_STAGING_HOST:latest
+          - DB_HOST=DB_PRODUCTION_HOST:latest
           - "--update-secrets"
-          - DB_NAME=DB_STAGING_NAME:latest
+          - DB_NAME=DB_PRODUCTION_NAME:latest
           - "--update-secrets"
-          - DB_PASSWORD=DB_STAGING_PASSWORD:latest
+          - DB_PASSWORD=DB_PRODUCTION_PASSWORD:latest
           - "--update-secrets"
           - DB_PORT=DB_PORT:latest
           - "--update-secrets"
@@ -105,3 +107,4 @@ steps:
 
 images:
     - "gcr.io/$PROJECT_ID/smartcube-api-stg:$COMMIT_SHA"
+
