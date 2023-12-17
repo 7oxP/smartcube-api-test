@@ -56,7 +56,7 @@ steps:
       args:
           - run
           - deploy
-          - smartcube-api-test
+          - smartcube-api-stg
           - "--image"
           - "gcr.io/$PROJECT_ID/smartcube-api-stg:$COMMIT_SHA"
           - "--region"
