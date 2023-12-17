@@ -89,7 +89,9 @@ const storeNotification = async function (
         title,
         description,
         uploadResponse == null ? "" : uploadResponse.getData().fileUrl,
-        storeResponse.getData().id
+        storeResponse.getData().id,
+        deviceId,
+        deviceType
     )
 
     return new Response()
