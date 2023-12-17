@@ -22,7 +22,7 @@ export class CloudMessagingService implements ICloudMessagingService {
         return this.app.name != "" ? true : false
     }
 
-    async sendNotification(fcmRegistrationToken: string[], title: string, description: string, imageUrl: string, notificationId: string): Promise<IResponse> {
+    async sendNotification(fcmRegistrationToken: string[], title: string, description: string, imageUrl: string, notificationId: string, deviceId: number, deviceType: string): Promise<IResponse> {
 
         let messagePayload: MulticastMessage = {
             data: {
@@ -30,7 +30,9 @@ export class CloudMessagingService implements ICloudMessagingService {
                 title: title,
                 description: description,
                 imageUrl: imageUrl,
-                deeplinkURL: `https://ppidev.smartcube.com/notification/${notificationId}`
+                deeplinkURL: `https://ppidev.smartcube.com/notification/${notificationId}`,
+                deviceId: String(deviceId),
+                deviceType: deviceType
             },
             tokens: fcmRegistrationToken
         };
