@@ -30,7 +30,7 @@ export class CloudMessagingService implements ICloudMessagingService {
                 title: title,
                 description: description,
                 imageUrl: imageUrl,
-                deeplinkURL: `https://ppidev.smartcube.com/notification/${notificationId}`,
+                deeplinkURL: `https://ppidev.pantauai.com/notification/${notificationId}`,
                 deviceId: String(deviceId),
                 deviceType: deviceType
             },
