@@ -22,7 +22,7 @@ export class CloudMessagingService implements ICloudMessagingService {
         return this.app.name != "" ? true : false
     }
 
-    async sendNotification(fcmRegistrationToken: string[], title: string, description: string, imageUrl: string, notificationId: string, edgeServerId: number, deviceId: number, deviceType: string): Promise<IResponse> {
+    async sendNotification(fcmRegistrationToken: string[], title: string, description: string, imageUrl: string, notificationId: string, deviceId: number, deviceType: string): Promise<IResponse> {
 
         let messagePayload: MulticastMessage = {
             data: {
@@ -30,8 +30,7 @@ export class CloudMessagingService implements ICloudMessagingService {
                 title: title,
                 description: description,
                 imageUrl: imageUrl,
-                deeplinkURL: `https://ppidev.pantauai.com/${edgeServerId}/${deviceId}/${notificationId}`,
-                edgeServerId: String(edgeServerId),
+                deeplinkURL: `https://ppidev.pantauai.com/notification/${notificationId}`,
                 deviceId: String(deviceId),
                 deviceType: deviceType
             },
