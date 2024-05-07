@@ -69,7 +69,8 @@ class NotificationRepository implements INotificationRepositories {
                         },
                         right: true,
                     }]
-                }
+                },
+                order: [['createdAt', 'DESC']]
             })
 
             return new Response()
