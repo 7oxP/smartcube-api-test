@@ -24,6 +24,7 @@ class NotificationHandlers {
                 // image: { notEmpty: true,  },
                 title: { notEmpty: true, },
                 description: { notEmpty: true, },
+                edge_server_id: { notEmpty: true, },
                 device_id: { notEmpty: true, },
                 device_type: { notEmpty: true, },
                 // object_label: { notEmpty: true, },
@@ -83,6 +84,7 @@ class NotificationHandlers {
             const notifResponse = await this.notificationService.storeNotification(
                 authGuard,
                 uploadedFile,
+                req.body.edge_server_id,
                 req.body.device_id,
                 req.body.device_type,
                 req.body.object_label,
