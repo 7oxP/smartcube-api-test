@@ -57,4 +57,4 @@ export class CloudMessagingService implements ICloudMessagingService {
 
     }
 
-}
+} 

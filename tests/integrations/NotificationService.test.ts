@@ -333,4 +333,4 @@ describe("delete notification", () => {
     assert.equal(res.getStatusCode(), OperationStatus.success);
   });
 
-});
+}); 

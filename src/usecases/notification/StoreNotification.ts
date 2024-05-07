@@ -103,5 +103,5 @@ const storeNotification = async function (
         .setData(storeResponse.getData())
 }
 
-export { storeNotification }
+export { storeNotification } 
 
