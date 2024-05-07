@@ -70,7 +70,7 @@ class NotificationRepository implements INotificationRepositories {
                         right: true,
                     }]
                 },
-                order: [['createdAt', 'DESC']]
+                order: [['created_at', 'DESC']]
             })
 
             return new Response()
