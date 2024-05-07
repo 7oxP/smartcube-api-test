@@ -81,4 +81,4 @@ class NotificationService implements INotificationService {
     }
 }
 
-export { NotificationService } 
+export { NotificationService }

@@ -23,4 +23,4 @@ describe("test cloud message connection", () => {
         
         assert.ok(res.getStatus())
     })
-}) 
+})

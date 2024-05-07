@@ -19,4 +19,4 @@ export interface INotificationService {
     deleteNotification(authGuard: IAuthGuard, id: number, edgeServerId: number): Promise<IResponse>
     sendResetPasswordToken(email: string, resetToken: string): Promise<IResponse>
     sendSignUpVerificationCode(email: string, code: string): Promise<IResponse>
-} 
+}
