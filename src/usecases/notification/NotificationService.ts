@@ -36,6 +36,7 @@ class NotificationService implements INotificationService {
     storeNotification(
         authGuard: IAuthGuard,
         file: IUploadedFile | null,
+        edgeServerId: number,
         deviceId: number,
         deviceType: string,
         objectLabel: string,
@@ -50,6 +51,7 @@ class NotificationService implements INotificationService {
             this.cloudMessageService,
             this.cloudStorageService,
             file,
+            edgeServerId,
             deviceId,
             deviceType,
             objectLabel,

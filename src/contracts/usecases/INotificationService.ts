@@ -5,7 +5,8 @@ import { IAuthGuard } from "../middleware/AuthGuard";
 export interface INotificationService {
     storeNotification(
         authGuard: IAuthGuard, 
-        file: IUploadedFile | null, 
+        file: IUploadedFile | null,
+        edgeServerId: number,
         deviceId: number,
         deviceType: string,
         objectLabel: string,
