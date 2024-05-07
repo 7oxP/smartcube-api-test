@@ -237,7 +237,7 @@ describe("fetch all", () => {
 
     const res = await notificationService.fetchAllNotification(authGuard);
 
-    // console.log(res)
+    console.log(res)
     assert.ok(res.getStatus());
     assert.equal(res.getData().length, 2)
     assert.equal(res.getStatusCode(), OperationStatus.success);
@@ -248,7 +248,7 @@ describe("fetch all", () => {
 
     const res = await notificationService.fetchAllNotification(authGuard);
 
-    // console.log(res)
+    console.log(res)
     assert.ok(res.getStatus());
     assert.equal(res.getData().length, 2)
     assert.equal(res.getStatusCode(), OperationStatus.success);
@@ -259,7 +259,7 @@ describe("fetch all", () => {
 
     const res = await notificationService.fetchAllNotification(authGuard);
 
-    // console.log(res)
+    console.log(res)
     assert.ok(res.getStatus());
     assert.equal(res.getData().length, 2)
     assert.equal(res.getStatusCode(), OperationStatus.success);
@@ -270,7 +270,7 @@ describe("fetch all", () => {
 
     const res = await notificationService.fetchAllNotification(authGuard);
 
-    // console.log(res)
+    console.log(res)
     assert.ok(res.getStatus());
     assert.equal(res.getData().length, 0)
     assert.equal(res.getStatusCode(), OperationStatus.success);
